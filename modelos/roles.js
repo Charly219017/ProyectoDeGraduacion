@@ -1,6 +1,6 @@
 // carpeta backend/modelos/roles.js
 module.exports = (sequelize, DataTypes) => {
-  const Rol = sequelize.define('Roles', {
+  const Roles = sequelize.define('Roles', {
     id_rol: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -25,5 +25,5 @@ module.exports = (sequelize, DataTypes) => {
   };
   */
 
-  return Rol;
+  return Roles;
 };

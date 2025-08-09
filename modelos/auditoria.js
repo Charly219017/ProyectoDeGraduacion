@@ -2,44 +2,39 @@
 
 module.exports = (sequelize, DataTypes) => {
   const Auditoria = sequelize.define('Auditoria', {
-    // La clave primaria en la BD es 'id_log'
     id_log: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
       allowNull: false
     },
-    // La columna en la BD se llama 'usuario'
-    id_usuario: {
+    // Nombre del campo en el modelo para el ID de usuario
+    usuario: { 
       type: DataTypes.INTEGER,
-      field: 'usuario',
-      allowNull: true, // Lo cambiamos a true porque puede ser nulo en caso de un login fallido
+      // La columna en la BD se llama 'usuario', no necesitamos 'field'
+      allowNull: true,
     },
     accion: {
       type: DataTypes.STRING(50),
       allowNull: false
     },
-    // La columna en la BD se llama 'tabla_afectada'
     tabla_afectada: {
       type: DataTypes.STRING(100),
       allowNull: true
     },
-    // La columna en la BD se llama 'id_registro'
     id_registro_afectado: {
       type: DataTypes.INTEGER,
       field: 'id_registro',
       allowNull: true
     },
-    // La columna en la BD se llama 'descripcion'
-    detalles: {
-      type: DataTypes.JSON, // Cambia a JSONB para que coincida con el tipo de datos de tu base de datos
-      field: 'descripcion',
+    // Se corrige a 'descripcion' y se usa el tipo de dato TEXT
+    descripcion: { 
+      type: DataTypes.TEXT,
       allowNull: true
     },
-    // La columna en la BD se llama 'fecha'
-    fecha_accion: {
+    // Se cambia el nombre del campo a 'fecha' para que coincida con la BD
+    fecha: {
       type: DataTypes.DATE,
-      field: 'fecha',
       defaultValue: DataTypes.NOW,
       allowNull: false
     }
@@ -50,9 +45,8 @@ module.exports = (sequelize, DataTypes) => {
 
   Auditoria.associate = (models) => {
     Auditoria.belongsTo(models.Usuarios, {
-      // La clave foránea en la tabla es 'usuario'
       foreignKey: 'usuario',
-      as: 'usuarioRelacionado' // Alias para la asociación
+      as: 'usuarioRelacionado'
     });
   };
 
