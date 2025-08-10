@@ -19,7 +19,10 @@ const {
 // Importar rutas
 const authRutas = require('./rutas/authRutas');
 const dashboardRutas = require('./rutas/dashboardRutas');
-const mantenimientoRutas = require('./rutas/mantenimientoRutas'); // <-- Importación de las nuevas rutas de mantenimiento
+const mantenimientoRutas = require('./rutas/mantenimientoRutas'); 
+const empleadoRutas = require('./rutas/empleadoRutas');
+const carreraRutas = require('./rutas/carreraRutas');
+const puestoRutas = require('./rutas/puestoRutas');
 
 // Crear aplicación Express
 const app = express();
@@ -78,7 +81,10 @@ app.get('/api', (req, res) => {
 // Configurar rutas de la API
 app.use('/api/auth', authRutas);
 app.use('/api/dashboard', dashboardRutas);
-app.use('/api/mantenimiento', mantenimientoRutas); // <-- Registro de las nuevas rutas de mantenimiento
+app.use('/api/mantenimiento', mantenimientoRutas); 
+app.use('/api/empleados', empleadoRutas);
+app.use('/api/carreras', carreraRutas);
+app.use('/api/puestos', puestoRutas);
 
 // --- Manejo de errores y rutas no encontradas ---
 // Middleware para manejar rutas no encontradas (debe ir después de todas las rutas)
