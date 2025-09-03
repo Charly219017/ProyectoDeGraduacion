@@ -1,8 +1,7 @@
 // Carpeta backend/controladores/dashboardControlador.js
 const logger = require('../utilidades/logger');
-const Empleados = require('../modelos/empleados');
-const Vacaciones = require('../modelos/vacaciones');
-const Evaluaciones = require('../modelos/evaluaciones');
+// Importar los modelos desde el objeto db centralizado para asegurar que estén inicializados
+const { Empleados, Vacaciones, Evaluaciones } = require('../modelos');
 
 /**
  * Controlador para obtener estadísticas del dashboard
@@ -17,11 +16,13 @@ const obtenerEstadisticas = async (req, res) => {
       vacacionesPendientes,
       evaluacionesPendientes,
     ] = await Promise.all([
-      Empleados.count({ where: { estado_empleo: 'Activo' } }),
+      // Usar la columna booleana correcta para el conteo
+      Empleados.count({ where: { estadoEmpleado: true } }), // Aseguramos que se usa el campo booleano correcto
       Empleados.count(),
       Vacaciones.count({ where: { estado: 'Aprobada' } }),
       Vacaciones.count({ where: { estado: 'Pendiente' } }),
-      Evaluaciones.count({ where: { estado: 'Pendiente' } }),
+      // Asumiendo que Evaluaciones también podría tener un estado, si no, ajustar o quitar
+      Evaluaciones.count({ where: { puntuacion_total: null } }), // Ejemplo: contar evaluaciones no completadas
     ]);
 
     // Calcular porcentajes

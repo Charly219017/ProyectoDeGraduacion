@@ -51,6 +51,10 @@ const crearEmpleado = async (req, res) => {
 const obtenerTodosEmpleados = async (req, res) => {
     try {
         const empleados = await Empleados.findAll({
+            // Añadimos la condición para filtrar solo empleados activos
+            where: {
+                estadoEmpleado: true
+            },
             // Incluir las relaciones con Puestos, Creador y Actualizador
             include: [
                 { model: Puestos, as: 'puesto' },
@@ -159,14 +163,19 @@ const eliminarEmpleado = async (req, res) => {
             return res.status(404).json({ mensaje: 'Empleado no encontrado' });
         }
 
-        await empleadoAEliminar.destroy();
+        // Borrado lógico: cambiar el estado a false (inactivo)
+        await empleadoAEliminar.update({ 
+            estadoEmpleado: false,
+            actualizado_por: req.usuario.id,
+            fecha_actualizacion: new Date()
+        });
 
         // Registrar la acción en la tabla de auditoría
         await Auditoria.create({
-            accion: 'ELIMINAR_EMPLEADO',
+            accion: 'ELIMINAR_EMPLEADO (LÓGICO)',
             usuario: req.usuario.id,
             descripcion: JSON.stringify({
-                mensaje: `Eliminación de empleado: ${empleadoAEliminar.nombre_completo}`,
+                mensaje: `Desactivación de empleado: ${empleadoAEliminar.nombre_completo}`,
                 empleado_eliminado_id: empleadoAEliminar.id_empleado,
             }),
             tabla_afectada: 'empleados',
@@ -174,7 +183,7 @@ const eliminarEmpleado = async (req, res) => {
         });
 
         logger.info(`Empleado con ID ${id_empleado} eliminado por ${req.usuario.nombre_usuario}`);
-        res.json({ mensaje: 'Empleado eliminado exitosamente' });
+        res.json({ mensaje: 'Empleado desactivado exitosamente' });
 
     } catch (error) {
         logger.error(`Error al eliminar empleado por ID ${req.params.id_empleado}:`, error);

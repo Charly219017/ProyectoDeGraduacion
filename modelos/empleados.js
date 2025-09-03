@@ -71,13 +71,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    estado_empleo: {
-      type: DataTypes.STRING(20),
+    // Se elimina estado_empleo para evitar redundancia. Usaremos estadoEmpleado.
+    estadoEmpleado: {
+      type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: 'Activo',
-      validate: {
-        isIn: [['Activo', 'Inactivo', 'Suspendido', 'Jubilado']]
-      }
+      defaultValue: true,
+      field: 'estadoempleado' // Mapea al nombre de la columna en la BD (PostgreSQL lo pone en minúsculas)
     },
     creado_por: {
       type: DataTypes.INTEGER,

@@ -1,4 +1,5 @@
-// carpeta: controladores/authControlador.js
+// Carpeta: backend/controladores/authControlador.js
+
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -7,11 +8,44 @@ const { Usuarios, Roles, Auditoria } = require('../modelos');
 const logger = require('../utilidades/logger');
 const config = require('../configuracion/configuracion');
 
+/**
+ * Genera un token JWT para el usuario.
+ * @param {Object} usuario - Objeto de usuario con id, nombre y rol.
+ * @returns {string} Token JWT.
+ */
+const generarToken = (usuario) => {
+  return jwt.sign(
+    { 
+      id: usuario.id_usuario, 
+      nombre: usuario.nombre_usuario, 
+      rol: usuario.roles?.nombre_rol 
+    },
+    config.jwt.secret,
+    {
+      expiresIn: config.jwt.expiracion,
+    }
+  );
+};
+
+/**
+ * Controlador para el inicio de sesión de usuarios.
+ */
 const login = async (req, res) => {
   try {
     const errores = validationResult(req);
     if (!errores.isEmpty()) {
       logger.warn('Datos de login inválidos:', errores.array());
+      // Log de intento de login con datos inválidos
+      await Auditoria.create({
+        accion: 'LOGIN_FAILED',
+        usuario: null,
+        descripcion: JSON.stringify({
+          mensaje: 'Intento de login fallido: datos de entrada inválidos',
+          errores: errores.array()
+        }),
+        tabla_afectada: null,
+        id_registro_afectado: null,
+      });
       return res.status(400).json({
         mensaje: 'Datos de entrada inválidos',
         errores: errores.array()
@@ -32,12 +66,16 @@ const login = async (req, res) => {
 
     if (!usuario) {
       logger.warn(`Intento de login fallido: usuario no encontrado - ${nombre_usuario}`);
-      // CAMBIO AQUÍ: Usamos 'id_usuario' y 'detalles'
+      // El campo 'descripcion' ahora almacena un JSON string
       await Auditoria.create({
         accion: 'LOGIN_FAILED',
-        id_usuario: null, // No tenemos el id del usuario, así que es null
-        detalles: { mensaje: `Intento de login fallido para usuario no registrado: ${nombre_usuario}` },
-        tabla_afectada: 'usuarios'
+        usuario: null,
+        descripcion: JSON.stringify({
+          mensaje: `Intento de login fallido para usuario no registrado`,
+          correo_ingresado: nombre_usuario
+        }),
+        tabla_afectada: 'usuarios',
+        id_registro_afectado: null
       });
       return res.status(401).json({ mensaje: 'Credenciales inválidas' });
     }
@@ -46,23 +84,37 @@ const login = async (req, res) => {
     
     if (!contrasenaValida) {
       logger.warn(`Intento de login fallido: contraseña incorrecta - ${nombre_usuario}`);
-      // CAMBIO AQUÍ: Usamos 'id_usuario' y 'detalles'
+      // El campo 'descripcion' ahora almacena un JSON string
       await Auditoria.create({
         accion: 'LOGIN_FAILED',
-        id_usuario: usuario.id_usuario,
-        detalles: { mensaje: `Intento de login fallido: contraseña incorrecta` },
-        tabla_afectada: 'usuarios'
+        usuario: usuario.id_usuario,
+        descripcion: JSON.stringify({
+          mensaje: `Intento de login fallido: contraseña incorrecta`,
+          usuario: {
+            id: usuario.id_usuario,
+            nombre: usuario.nombre_usuario
+          }
+        }),
+        tabla_afectada: 'usuarios',
+        id_registro_afectado: usuario.id_usuario
       });
       return res.status(401).json({ mensaje: 'Credenciales inválidas' });
     }
 
-    const token = generarToken(usuario.id_usuario);
+    const token = generarToken(usuario);
 
-    // CAMBIO AQUÍ: Usamos 'id_usuario' y 'detalles'
+    // El campo 'descripcion' ahora almacena un JSON string
     await Auditoria.create({
       accion: 'LOGIN_SUCCESS',
-      id_usuario: usuario.id_usuario,
-      detalles: { mensaje: `Login exitoso` },
+      usuario: usuario.id_usuario,
+      descripcion: JSON.stringify({
+        mensaje: `Login exitoso`,
+        usuario: {
+          id: usuario.id_usuario,
+          nombre: usuario.nombre_usuario,
+          correo: usuario.correo
+        }
+      }),
       tabla_afectada: 'usuarios',
       id_registro_afectado: usuario.id_usuario
     });
@@ -76,7 +128,7 @@ const login = async (req, res) => {
         id: usuario.id_usuario,
         nombre_usuario: usuario.nombre_usuario,
         correo: usuario.correo,
-        roles: usuario.roles?.nombre_rol || 'Invitado'
+        rol: usuario.roles?.nombre_rol || 'Invitado'
       }
     });
   } catch (error) {
@@ -85,6 +137,9 @@ const login = async (req, res) => {
   }
 };
 
+/**
+ * Controlador para el registro de nuevos usuarios.
+ */
 const registro = async (req, res) => {
   try {
     const errores = validationResult(req);
@@ -108,11 +163,22 @@ const registro = async (req, res) => {
       creado_por: req.usuario ? req.usuario.id : null
     });
     
-    // CAMBIO AQUÍ: Usamos 'id_usuario' y 'detalles'
+    // El campo 'descripcion' ahora almacena un JSON string
     await Auditoria.create({
       accion: 'REGISTRO',
-      id_usuario: req.usuario ? req.usuario.id : null,
-      detalles: { mensaje: `Registro de nuevo usuario: ${nuevoUsuario.nombre_usuario}` },
+      usuario: req.usuario ? req.usuario.id : null,
+      descripcion: JSON.stringify({
+        mensaje: `Registro de nuevo usuario: ${nuevoUsuario.nombre_usuario}`,
+        nuevo_usuario: {
+          id: nuevoUsuario.id_usuario,
+          nombre: nuevoUsuario.nombre_usuario,
+          correo: nuevoUsuario.correo
+        },
+        realizado_por: req.usuario ? {
+          id: req.usuario.id,
+          nombre: req.usuario.nombre_usuario
+        } : null
+      }),
       tabla_afectada: 'usuarios',
       id_registro_afectado: nuevoUsuario.id_usuario
     });
@@ -133,12 +199,9 @@ const registro = async (req, res) => {
   }
 };
 
-const generarToken = (id) => {
-  return jwt.sign({ id }, config.jwt.secret, {
-    expiresIn: config.jwt.expiracion
-  });
-};
-
+/**
+ * Controlador para obtener el perfil del usuario autenticado.
+ */
 const perfil = async (req, res) => {
   try {
     const usuario = await Usuarios.findByPk(req.usuario.id, {
@@ -153,7 +216,7 @@ const perfil = async (req, res) => {
       id: usuario.id_usuario,
       nombre_usuario: usuario.nombre_usuario,
       correo: usuario.correo,
-      roles: usuario.roles?.nombre_rol || 'Invitado'
+      rol: usuario.roles?.nombre_rol || 'Invitado'
     });
   } catch (error) {
     logger.error('Error al obtener perfil:', error);

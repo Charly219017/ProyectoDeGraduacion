@@ -79,7 +79,7 @@ const autorizarRoles = (...roles) => {
 };
 
 const soloAdministradores = autorizarRoles('Administrador');
-const empleadosYAdmin = autorizarRoles('Administrador', 'Empleado');
+const empleadosYAdmin = autorizarRoles('Administrador', 'Supervisor', 'Digitador','Empleado','Externo');
 
 module.exports = {
   autenticarToken,

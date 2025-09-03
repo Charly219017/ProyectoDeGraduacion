@@ -22,6 +22,7 @@ CREATE TABLE public.usuarios (
     nombre_usuario VARCHAR(50) NOT NULL UNIQUE,
     correo VARCHAR(100) NOT NULL UNIQUE,
     contrasena_hash TEXT NOT NULL,
+    estadoUsuario BOOLEAN NOT NULL DEFAULT TRUE,
     id_rol INTEGER NOT NULL,
     fecha_creacion TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMP WITHOUT TIME ZONE,
@@ -59,6 +60,7 @@ CREATE TABLE public.empleados (
     fecha_ingreso DATE NOT NULL,
     id_puesto INTEGER,
     estado_empleo VARCHAR(20) DEFAULT 'Activo',
+    estadoEmpleado BOOLEAN NOT NULL DEFAULT TRUE,
     creado_por INTEGER,
     fecha_creacion TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     actualizado_por INTEGER,
@@ -195,4 +197,3 @@ CREATE TABLE public.nomina (
     CONSTRAINT fk_creado_por FOREIGN KEY (creado_por) REFERENCES public.usuarios(id_usuario),
     CONSTRAINT fk_actualizado_por FOREIGN KEY (actualizado_por) REFERENCES public.usuarios(id_usuario)
 );
-

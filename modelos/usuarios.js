@@ -36,6 +36,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    estadoUsuario: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+      field: 'estadousuario' // Mapea este campo a la columna 'estadousuario' en la BD
+    },
     creado_por: {
       type: DataTypes.INTEGER,
       allowNull: true

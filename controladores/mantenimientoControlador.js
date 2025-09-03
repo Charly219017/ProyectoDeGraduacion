@@ -1,4 +1,5 @@
-// backend/controladores/mantenimientoControlador.js
+// Carpeta: backend/controladores/mantenimientoControlador.js
+
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const { Usuarios, Roles, Auditoria } = require('../modelos');
@@ -12,6 +13,10 @@ const Sequelize = require('sequelize');
 const obtenerTodosUsuarios = async (req, res) => {
   try {
     const usuarios = await Usuarios.findAll({
+      // Añadimos la condición para filtrar solo usuarios activos
+      where: {
+        estadoUsuario: true
+      },
       attributes: { exclude: ['contrasena_hash'] },
       include: [{ 
         model: Roles, 
@@ -67,14 +72,23 @@ const crearUsuario = async (req, res) => {
       creado_por: req.usuario.id
     });
     
-    //Se usa el campo 'descripcion' y se serializa el objeto JSON
+    // Almacenando un objeto JSON completo en el campo de descripción
+    const logData = {
+      mensaje: `Creación de usuario: ${nuevoUsuario.nombre_usuario}`,
+      nuevo_usuario: {
+        id: nuevoUsuario.id_usuario,
+        nombre: nuevoUsuario.nombre_usuario,
+        correo: nuevoUsuario.correo
+      },
+      realizado_por: {
+        id: req.usuario.id,
+        nombre: req.usuario.nombre_usuario
+      }
+    };
     await Auditoria.create({
       accion: 'CREAR_USUARIO',
       usuario: req.usuario.id,
-      descripcion: JSON.stringify({ 
-        mensaje: `Creación de usuario: ${nuevoUsuario.nombre_usuario}`,
-        nuevo_usuario_id: nuevoUsuario.id_usuario,
-      }),
+      descripcion: JSON.stringify(logData),
       tabla_afectada: 'usuarios',
       id_registro_afectado: nuevoUsuario.id_usuario
     });
@@ -101,7 +115,7 @@ const actualizarUsuario = async (req, res) => {
         errores: errors.array()
       });
     }
-    const { id_usuario} = req.params;
+    const { id_usuario } = req.params;
     const { nombre_usuario, correo, contrasena, id_rol } = req.body;
     
     const usuarioAActualizar = await Usuarios.findByPk(id_usuario);
@@ -123,15 +137,24 @@ const actualizarUsuario = async (req, res) => {
     
     await usuarioAActualizar.update(datosActualizados);
 
-    //Se usa el campo 'descripcion' y se serializa el objeto JSON
+    // Almacenando un objeto JSON completo en el campo de descripción
+    const logData = {
+      mensaje: `Actualización de usuario: ${usuarioAActualizar.nombre_usuario}`,
+      usuario_actualizado: {
+        id: id_usuario,
+        nombre: usuarioAActualizar.nombre_usuario,
+        correo: usuarioAActualizar.correo
+      },
+      nuevos_datos: { nombre_usuario, correo, id_rol },
+      realizado_por: {
+        id: req.usuario.id,
+        nombre: req.usuario.nombre_usuario
+      }
+    };
     await Auditoria.create({
       accion: 'ACTUALIZAR_USUARIO',
       usuario: req.usuario.id, 
-      descripcion: JSON.stringify({
-        mensaje: `Actualización de usuario: ${usuarioAActualizar.nombre_usuario}`,
-        usuario_actualizado: id_usuario,
-        nuevos_datos: datosActualizados
-      }),
+      descripcion: JSON.stringify(logData),
       tabla_afectada: 'usuarios',
       id_registro_afectado: id_usuario
     });
@@ -146,7 +169,8 @@ const actualizarUsuario = async (req, res) => {
   }
 };
 
-/** * Controlador para eliminar un usuario existente.
+/**
+ * Controlador para eliminar un usuario existente.
  */
 const eliminarUsuario = async (req, res) => {
   try {
@@ -157,28 +181,43 @@ const eliminarUsuario = async (req, res) => {
       return res.status(404).json({ mensaje: 'Usuario no encontrado' });
     }
 
-    //Se usa el campo 'descripcion' y se serializa el objeto JSON
+    // Borrado lógico: cambiar el estado a false (inactivo)
+    await usuarioAEliminar.update({
+      estadoUsuario: false, // Usamos la nueva columna
+      actualizado_por: req.usuario.id,
+      fecha_actualizacion: new Date()
+    });
+
+    // Almacenando un objeto JSON completo en el campo de descripción
+    const logData = {
+      mensaje: `Desactivación de usuario: ${usuarioAEliminar.nombre_usuario}`,
+      usuario_eliminado: {
+        id: usuarioAEliminar.id_usuario,
+        nombre: usuarioAEliminar.nombre_usuario
+      },
+      realizado_por: {
+        id: req.usuario.id,
+        nombre: req.usuario.nombre_usuario
+      }
+    };
     await Auditoria.create({
-      accion: 'ELIMINAR_USUARIO',
+      accion: 'ELIMINAR_USUARIO (LÓGICO)',
       usuario: req.usuario.id,
-      descripcion: JSON.stringify({
-        mensaje: `Eliminación de usuario: ${usuarioAEliminar.nombre_usuario}`,
-        usuario_eliminado: usuarioAEliminar.id_usuario,
-      }),
+      descripcion: JSON.stringify(logData),
       tabla_afectada: 'usuarios',
       id_registro_afectado: usuarioAEliminar.id_usuario
     });
 
-    await usuarioAEliminar.destroy();
     logger.info(`Usuario eliminado exitosamente: ${usuarioAEliminar.nombre_usuario} por ${req.usuario.nombre_usuario}`);
-    res.json({ mensaje: 'Usuario eliminado exitosamente' });
+    res.json({ mensaje: 'Usuario desactivado exitosamente' });
   } catch (error) {
     logger.error(`Error al eliminar usuario: ${req.params.id_usuario}: `, error);
     res.status(500).json({ mensaje: 'Error interno del servidor' });
   }
 };
 
-/** * Controlador para obtener todos los registros de auditoría.
+/**
+ * Controlador para obtener todos los registros de auditoría.
  */
 const obtenerAuditoria = async (req, res) => {
   try {
