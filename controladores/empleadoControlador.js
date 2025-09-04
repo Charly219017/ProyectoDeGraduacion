@@ -51,6 +51,13 @@ const crearEmpleado = async (req, res) => {
 const obtenerTodosEmpleados = async (req, res) => {
     try {
         const empleados = await Empleados.findAll({
+<<<<<<< HEAD
+=======
+            // Añadimos la condición para filtrar solo empleados activos
+            where: { // Corregido para usar el nombre de columna correcto
+                estado_empleado: true
+            },
+>>>>>>> 4c225b4 (manejaretodo lo de modulo1)
             // Incluir las relaciones con Puestos, Creador y Actualizador
             include: [
                 { model: Puestos, as: 'puesto' },
@@ -159,7 +166,16 @@ const eliminarEmpleado = async (req, res) => {
             return res.status(404).json({ mensaje: 'Empleado no encontrado' });
         }
 
+<<<<<<< HEAD
         await empleadoAEliminar.destroy();
+=======
+        // Borrado lógico: cambiar el estado a false (inactivo)
+        await empleadoAEliminar.update({ 
+            estado_empleado: false, // Corregido para usar el nombre de columna correcto
+            actualizado_por: req.usuario.id,
+            fecha_actualizacion: new Date()
+        });
+>>>>>>> 4c225b4 (manejaretodo lo de modulo1)
 
         // Registrar la acción en la tabla de auditoría
         await Auditoria.create({

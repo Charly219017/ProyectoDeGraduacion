@@ -44,9 +44,17 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true
     },
+    estado_puesto: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+      field: 'estado_puesto'
+    },
   }, {
     tableName: 'puestos',
-    timestamps: false,
+    timestamps: true, // Habilitar timestamps para que Sequelize maneje fecha_creacion y fecha_actualizacion
+    createdAt: 'fecha_creacion',
+    updatedAt: 'fecha_actualizacion',
   });
 
   // Las asociaciones se definen en una función 'associate' que se llamará desde index.js

@@ -12,6 +12,13 @@ const Sequelize = require('sequelize');
 const obtenerTodosUsuarios = async (req, res) => {
   try {
     const usuarios = await Usuarios.findAll({
+<<<<<<< HEAD
+=======
+      // Añadimos la condición para filtrar solo usuarios activos (corregido)
+      where: {
+        estado_usuario: true
+      },
+>>>>>>> 4c225b4 (manejaretodo lo de modulo1)
       attributes: { exclude: ['contrasena_hash'] },
       include: [{ 
         model: Roles, 
@@ -48,14 +55,6 @@ const crearUsuario = async (req, res) => {
       });
     }
     const { nombre_usuario, correo, contrasena, id_rol } = req.body;
-
-    const usuarioExistente = await Usuarios.findOne({
-      where: { [Sequelize.Op.or]: [{ nombre_usuario }, { correo }] }
-    });
-
-    if (usuarioExistente) {
-      return res.status(409).json({ mensaje: 'El nombre de usuario o correo ya están en uso' });
-    }
 
     const contrasena_hash = await bcrypt.hash(contrasena, 10);
 
@@ -157,7 +156,29 @@ const eliminarUsuario = async (req, res) => {
       return res.status(404).json({ mensaje: 'Usuario no encontrado' });
     }
 
+<<<<<<< HEAD
     //Se usa el campo 'descripcion' y se serializa el objeto JSON
+=======
+    // Borrado lógico: cambiar el estado a false (inactivo)
+    await usuarioAEliminar.update({
+      estado_usuario: false, // Usamos la nueva columna (corregido)
+      actualizado_por: req.usuario.id,
+      fecha_actualizacion: new Date()
+    });
+
+    // Almacenando un objeto JSON completo en el campo de descripción
+    const logData = {
+      mensaje: `Desactivación de usuario: ${usuarioAEliminar.nombre_usuario}`,
+      usuario_eliminado: {
+        id: usuarioAEliminar.id_usuario,
+        nombre: usuarioAEliminar.nombre_usuario
+      },
+      realizado_por: {
+        id: req.usuario.id,
+        nombre: req.usuario.nombre_usuario
+      }
+    };
+>>>>>>> 4c225b4 (manejaretodo lo de modulo1)
     await Auditoria.create({
       accion: 'ELIMINAR_USUARIO',
       usuario: req.usuario.id,

@@ -1,5 +1,6 @@
 // backend/utilidades/validadores.js
 const { body } = require('express-validator');
+const { Usuarios } = require('../modelos');
 
 /**
  * Validaciones para la creación de un nuevo usuario.
@@ -8,8 +9,21 @@ const { body } = require('express-validator');
 const validarCreacionUsuario = [
   body('nombre_usuario')
     .isLength({ min: 3 }).withMessage('El nombre de usuario debe tener al menos 3 caracteres'),
+  // Validación de unicidad para nombre_usuario
+  body('nombre_usuario').custom(async (value) => {
+    const usuario = await Usuarios.findOne({ where: { nombre_usuario: value } });
+    if (usuario) {
+      return Promise.reject('El nombre de usuario ya está en uso');
+    }
+  }),
   body('correo')
-    .isEmail().withMessage('El correo electrónico no es válido'),
+    .isEmail().withMessage('El correo electrónico no es válido')
+    .custom(async (value) => {
+      const usuario = await Usuarios.findOne({ where: { correo: value } });
+      if (usuario) {
+        return Promise.reject('El correo electrónico ya está registrado');
+      }
+    }),
   body('contrasena')
     .isLength({ min: 6 }).withMessage('La contraseña debe tener al menos 6 caracteres'),
   body('id_rol')
@@ -26,7 +40,14 @@ const validarActualizacionUsuario = [
     .isLength({ min: 3 }).withMessage('El nombre de usuario debe tener al menos 3 caracteres'),
   body('correo')
     .optional()
-    .isEmail().withMessage('El correo electrónico no es válido'),
+    .isEmail().withMessage('El correo electrónico no es válido')
+    .custom(async (value, { req }) => {
+      const usuario = await Usuarios.findOne({ where: { correo: value } });
+      // Si el correo existe y no pertenece al usuario que se está actualizando, rechazar.
+      if (usuario && usuario.id_usuario !== parseInt(req.params.id_usuario, 10)) {
+        return Promise.reject('El correo electrónico ya está registrado por otro usuario');
+      }
+    }),
   body('contrasena')
     .optional()
     .isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 6 caracteres'),

@@ -51,6 +51,9 @@ const crearPuesto = async (req, res) => {
 const obtenerTodosPuestos = async (req, res) => {
     try {
         const puestos = await Puestos.findAll({
+            where: {
+                estado_puesto: true
+            },
             include: [
                 { model: Departamentos, as: 'departamento' },
                 { model: Usuarios, as: 'creador' },
@@ -157,22 +160,27 @@ const eliminarPuesto = async (req, res) => {
             return res.status(404).json({ mensaje: 'Puesto no encontrado' });
         }
 
-        await puestoAEliminar.destroy();
+        // Borrado lógico en lugar de físico
+        await puestoAEliminar.update({
+            estado_puesto: false,
+            actualizado_por: req.usuario.id,
+            fecha_actualizacion: new Date()
+        });
 
         // Registrar la acción en la tabla de auditoría
         await Auditoria.create({
-            accion: 'ELIMINAR_PUESTO',
+            accion: 'ELIMINAR_PUESTO (LÓGICO)',
             usuario: req.usuario.id,
             descripcion: JSON.stringify({
-                mensaje: `Eliminación de puesto: ${puestoAEliminar.nombre_puesto}`,
+                mensaje: `Desactivación de puesto: ${puestoAEliminar.nombre_puesto}`,
                 puesto_eliminado_id: puestoAEliminar.id_puesto,
             }),
             tabla_afectada: 'puestos',
             id_registro_afectado: puestoAEliminar.id_puesto
         });
 
-        logger.info(`Puesto con ID ${id_puesto} eliminado por ${req.usuario.nombre_usuario}`);
-        res.json({ mensaje: 'Puesto eliminado exitosamente' });
+        logger.info(`Puesto con ID ${id_puesto} desactivado por ${req.usuario.nombre_usuario}`);
+        res.json({ mensaje: 'Puesto desactivado exitosamente' });
 
     } catch (error) {
         logger.error(`Error al eliminar puesto por ID ${req.params.id_puesto}:`, error);

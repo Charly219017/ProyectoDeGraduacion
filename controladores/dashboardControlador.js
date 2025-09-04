@@ -17,7 +17,12 @@ const obtenerEstadisticas = async (req, res) => {
       vacacionesPendientes,
       evaluacionesPendientes,
     ] = await Promise.all([
+<<<<<<< HEAD
       Empleados.count({ where: { estado_empleo: 'Activo' } }),
+=======
+      // Corregido: Usar el nombre del campo del modelo (camelCase)
+      Empleados.count({ where: { estadoEmpleado: true } }),
+>>>>>>> 4c225b4 (manejaretodo lo de modulo1)
       Empleados.count(),
       Vacaciones.count({ where: { estado: 'Aprobada' } }),
       Vacaciones.count({ where: { estado: 'Pendiente' } }),

@@ -74,10 +74,15 @@ module.exports = (sequelize, DataTypes) => {
     estado_empleo: {
       type: DataTypes.STRING(20),
       allowNull: false,
+<<<<<<< HEAD
       defaultValue: 'Activo',
       validate: {
         isIn: [['Activo', 'Inactivo', 'Suspendido', 'Jubilado']]
       }
+=======
+      defaultValue: true,
+      field: 'estadoempleado' // Mapea a la columna correcta 'estadoempleado'
+>>>>>>> 4c225b4 (manejaretodo lo de modulo1)
     },
     creado_por: {
       type: DataTypes.INTEGER,
@@ -99,6 +104,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     tableName: 'empleados',
     timestamps: true,
+    createdAt: 'fecha_creacion',
+    updatedAt: 'fecha_actualizacion'
   });
 
   // Las asociaciones se definen en una función 'associate' que se llamará desde index.js

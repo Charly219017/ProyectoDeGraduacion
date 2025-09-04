@@ -145,6 +145,7 @@ const eliminarCarrera = async (req, res) => {
             return res.status(404).json({ mensaje: 'Carrera no encontrada' });
         }
 
+        // Borrado físico, ya que la tabla no tiene campo de estado
         await carreraAEliminar.destroy();
 
         // Registrar la acción en la tabla de auditoría
