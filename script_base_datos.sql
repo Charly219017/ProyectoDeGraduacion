@@ -85,12 +85,12 @@ CREATE TABLE IF NOT EXISTS empleados (
 );
 
 -- TABLA: dependencias
-CREATE TABLE IF NOT EXISTS dependencias (
-    id_dependencia SERIAL PRIMARY KEY,
-    id_puesto_superior INTEGER,
-    id_puesto_subordinado INTEGER UNIQUE,
-    CONSTRAINT fk_puesto_superior FOREIGN KEY (id_puesto_superior) REFERENCES puestos (id_puesto),
-    CONSTRAINT fk_puesto_subordinado FOREIGN KEY (id_puesto_subordinado) REFERENCES puestos (id_puesto)
+CREATE TABLE IF NOT EXISTS public.dependencias(
+    id_dependencia serial NOT NULL,
+    id_puesto_superior integer,
+    id_puesto_subordinado integer,
+    CONSTRAINT dependencias_pkey PRIMARY KEY (id_dependencia),
+    CONSTRAINT dependencias_id_puesto_subordinado_key UNIQUE (id_puesto_subordinado)
 );
 
 -- TABLA: bienestar

@@ -26,14 +26,14 @@ const crearEmpleado = async (req, res) => {
             accion: 'CREAR_EMPLEADO',
             usuario: req.usuario.id,
             descripcion: JSON.stringify({
-                mensaje: `Creación de nuevo empleado: ${nuevoEmpleado.nombre_completo}`,
+                mensaje: `Creación de nuevo empleado: ${nuevoEmpleado.nombre} ${nuevoEmpleado.apellido}`,
                 nuevo_empleado_id: nuevoEmpleado.id_empleado,
             }),
             tabla_afectada: 'empleados',
             id_registro_afectado: nuevoEmpleado.id_empleado
         });
 
-        logger.info(`Empleado creado exitosamente: ${nuevoEmpleado.nombre_completo} por ${req.usuario.nombre_usuario}`);
+        logger.info(`Empleado creado exitosamente: ${nuevoEmpleado.nombre} ${nuevoEmpleado.apellido} por ${req.usuario.nombre_usuario}`);
         res.status(201).json({
             mensaje: 'Empleado creado exitosamente',
             empleado: nuevoEmpleado
@@ -53,7 +53,7 @@ const obtenerTodosEmpleados = async (req, res) => {
         const empleados = await Empleados.findAll({
             // Añadimos la condición para filtrar solo empleados activos
             where: {
-                estadoEmpleado: true
+                estadoempleado: true
             },
             // Incluir las relaciones con Puestos, Creador y Actualizador
             include: [
@@ -131,7 +131,7 @@ const actualizarEmpleado = async (req, res) => {
             accion: 'ACTUALIZAR_EMPLEADO',
             usuario: req.usuario.id,
             descripcion: JSON.stringify({
-                mensaje: `Actualización de empleado: ${empleadoAActualizar.nombre_completo}`,
+                mensaje: `Actualización de empleado: ${empleadoAActualizar.nombre} ${empleadoAActualizar.apellido}`,
                 empleado_actualizado_id: empleadoAActualizar.id_empleado,
                 nuevos_datos: req.body
             }),
@@ -165,7 +165,7 @@ const eliminarEmpleado = async (req, res) => {
 
         // Borrado lógico: cambiar el estado a false (inactivo)
         await empleadoAEliminar.update({ 
-            estadoEmpleado: false,
+            estadoempleado: false,
             actualizado_por: req.usuario.id,
             fecha_actualizacion: new Date()
         });
@@ -175,7 +175,7 @@ const eliminarEmpleado = async (req, res) => {
             accion: 'ELIMINAR_EMPLEADO',
             usuario: req.usuario.id,
             descripcion: JSON.stringify({
-                mensaje: `Eliminación de empleado: ${empleadoAEliminar.nombre_completo}`,
+                mensaje: `Eliminación de empleado: ${empleadoAEliminar.nombre} ${empleadoAEliminar.apellido}`,
                 empleado_eliminado_id: empleadoAEliminar.id_empleado,
             }),
             tabla_afectada: 'empleados',

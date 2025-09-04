@@ -63,6 +63,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW
+    },
+    creado_por: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    actualizado_por: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    fecha_actualizacion: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     tableName: 'nomina',
@@ -79,6 +91,16 @@ module.exports = (sequelize, DataTypes) => {
     Nomina.belongsTo(models.Empleados, {
       foreignKey: 'id_empleado',
       as: 'empleado'
+    });
+
+    Nomina.belongsTo(models.Usuarios, {
+      foreignKey: 'creado_por',
+      as: 'creador'
+    });
+
+    Nomina.belongsTo(models.Usuarios, {
+      foreignKey: 'actualizado_por',
+      as: 'actualizador'
     });
   };
 

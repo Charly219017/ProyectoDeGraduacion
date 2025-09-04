@@ -52,7 +52,7 @@ const obtenerTodosPuestos = async (req, res) => {
     try {
         const puestos = await Puestos.findAll({ // Se elimina el filtro de estado ya que la columna no existe en la BD
             include: [
-                // { model: Departamentos, as: 'departamento' }, // Modelo Departamentos no existe
+                { model: Departamentos, as: 'departamento' },
                 { model: Usuarios, as: 'creador' },
                 { model: Usuarios, as: 'actualizador' }
             ]
@@ -75,7 +75,7 @@ const obtenerPuestoPorId = async (req, res) => {
         const { id_puesto } = req.params;
         const puesto = await Puestos.findByPk(id_puesto, {
             include: [
-                // { model: Departamentos, as: 'departamento' }, // Modelo Departamentos no existe
+                { model: Departamentos, as: 'departamento' },
                 { model: Usuarios, as: 'creador' },
                 { model: Usuarios, as: 'actualizador' }
             ]

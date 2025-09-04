@@ -15,15 +15,6 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'roles', // Nombre de la tabla de la base de datos
     timestamps: false
   });
-/*
-  // Definimos la relación inversa: un rol tiene muchos usuarios
-  Rol.associate = (models) => {
-    Rol.hasMany(models.Usuarios, {
-      foreignKey: 'id_rol',
-      as: 'usuarios'
-    });
-  };
-  */
 
   return Roles;
 };

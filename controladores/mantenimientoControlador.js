@@ -14,7 +14,7 @@ const obtenerTodosUsuarios = async (req, res) => {
     const usuarios = await Usuarios.findAll({
       // Añadimos la condición para filtrar solo usuarios activos (corregido)
       where: {
-        estadoUsuario: true
+        estadousuario: true
       },
       attributes: { exclude: ['contrasena_hash'] },
       include: [{ 
@@ -69,7 +69,7 @@ const crearUsuario = async (req, res) => {
       usuario: req.usuario.id,
       descripcion: JSON.stringify({ 
         mensaje: `Creación de usuario: ${nuevoUsuario.nombre_usuario}`,
-        nuevo_usuario_id: nuevoUsuario.id_usuario,
+        nuevo_usuario_id: nuevoUsuario.id_usuario
       }),
       tabla_afectada: 'usuarios',
       id_registro_afectado: nuevoUsuario.id_usuario
@@ -126,7 +126,7 @@ const actualizarUsuario = async (req, res) => {
       descripcion: JSON.stringify({
         mensaje: `Actualización de usuario: ${usuarioAActualizar.nombre_usuario}`,
         usuario_actualizado: id_usuario,
-        nuevos_datos: datosActualizados
+        nuevos_datos: req.body // Guardamos el body para ver qué se intentó cambiar
       }),
       tabla_afectada: 'usuarios',
       id_registro_afectado: id_usuario
@@ -155,7 +155,7 @@ const eliminarUsuario = async (req, res) => {
 
     // Borrado lógico: cambiar el estado a false (inactivo)
     await usuarioAEliminar.update({
-      estadoUsuario: false,
+      estadousuario: false,
       actualizado_por: req.usuario.id,
       fecha_actualizacion: new Date()
     });
@@ -165,7 +165,7 @@ const eliminarUsuario = async (req, res) => {
       usuario: req.usuario.id,
       descripcion: JSON.stringify({
         mensaje: `Desactivación de usuario: ${usuarioAEliminar.nombre_usuario}`,
-        usuario_eliminado: usuarioAEliminar.id_usuario,
+        usuario_eliminado_id: usuarioAEliminar.id_usuario
       }),
       tabla_afectada: 'usuarios',
       id_registro_afectado: usuarioAEliminar.id_usuario
