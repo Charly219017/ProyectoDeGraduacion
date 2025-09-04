@@ -50,12 +50,9 @@ const crearPuesto = async (req, res) => {
  */
 const obtenerTodosPuestos = async (req, res) => {
     try {
-        const puestos = await Puestos.findAll({
-            where: {
-                estado_puesto: true
-            },
+        const puestos = await Puestos.findAll({ // Se elimina el filtro de estado ya que la columna no existe en la BD
             include: [
-                { model: Departamentos, as: 'departamento' },
+                // { model: Departamentos, as: 'departamento' }, // Modelo Departamentos no existe
                 { model: Usuarios, as: 'creador' },
                 { model: Usuarios, as: 'actualizador' }
             ]
@@ -78,7 +75,7 @@ const obtenerPuestoPorId = async (req, res) => {
         const { id_puesto } = req.params;
         const puesto = await Puestos.findByPk(id_puesto, {
             include: [
-                { model: Departamentos, as: 'departamento' },
+                // { model: Departamentos, as: 'departamento' }, // Modelo Departamentos no existe
                 { model: Usuarios, as: 'creador' },
                 { model: Usuarios, as: 'actualizador' }
             ]
@@ -160,27 +157,23 @@ const eliminarPuesto = async (req, res) => {
             return res.status(404).json({ mensaje: 'Puesto no encontrado' });
         }
 
-        // Borrado lógico en lugar de físico
-        await puestoAEliminar.update({
-            estado_puesto: false,
-            actualizado_por: req.usuario.id,
-            fecha_actualizacion: new Date()
-        });
+        // Borrado físico, ya que la tabla no tiene campo de estado
+        await puestoAEliminar.destroy();
 
         // Registrar la acción en la tabla de auditoría
         await Auditoria.create({
-            accion: 'ELIMINAR_PUESTO (LÓGICO)',
+            accion: 'ELIMINAR_PUESTO',
             usuario: req.usuario.id,
             descripcion: JSON.stringify({
-                mensaje: `Desactivación de puesto: ${puestoAEliminar.nombre_puesto}`,
+                mensaje: `Eliminación de puesto: ${puestoAEliminar.nombre_puesto}`,
                 puesto_eliminado_id: puestoAEliminar.id_puesto,
             }),
             tabla_afectada: 'puestos',
             id_registro_afectado: puestoAEliminar.id_puesto
         });
 
-        logger.info(`Puesto con ID ${id_puesto} desactivado por ${req.usuario.nombre_usuario}`);
-        res.json({ mensaje: 'Puesto desactivado exitosamente' });
+        logger.info(`Puesto con ID ${id_puesto} eliminado por ${req.usuario.nombre_usuario}`);
+        res.json({ mensaje: 'Puesto eliminado exitosamente' });
 
     } catch (error) {
         logger.error(`Error al eliminar puesto por ID ${req.params.id_puesto}:`, error);

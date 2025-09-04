@@ -1,8 +1,6 @@
 // Carpeta backend/controladores/dashboardControlador.js
 const logger = require('../utilidades/logger');
-const Empleados = require('../modelos/empleados');
-const Vacaciones = require('../modelos/vacaciones');
-const Evaluaciones = require('../modelos/evaluaciones');
+const { Empleados, Vacaciones, Evaluaciones } = require('../modelos');
 
 /**
  * Controlador para obtener estadísticas del dashboard
@@ -17,12 +15,7 @@ const obtenerEstadisticas = async (req, res) => {
       vacacionesPendientes,
       evaluacionesPendientes,
     ] = await Promise.all([
-<<<<<<< HEAD
-      Empleados.count({ where: { estado_empleo: 'Activo' } }),
-=======
-      // Corregido: Usar el nombre del campo del modelo (camelCase)
-      Empleados.count({ where: { estadoEmpleado: true } }),
->>>>>>> 4c225b4 (manejaretodo lo de modulo1)
+      Empleados.count({ where: { estadoEmpleado: true } }), // Usar el campo del modelo para el borrado lógico
       Empleados.count(),
       Vacaciones.count({ where: { estado: 'Aprobada' } }),
       Vacaciones.count({ where: { estado: 'Pendiente' } }),

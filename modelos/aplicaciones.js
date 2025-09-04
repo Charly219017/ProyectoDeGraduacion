@@ -12,19 +12,19 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: DataTypes.NOW
     },
-    estado: {
-      type: DataTypes.STRING(20),
+    estado_aplicacion: {
+      type: DataTypes.STRING(30),
       allowNull: false,
-      defaultValue: 'En Proceso',
+      defaultValue: 'En revisión',
       validate: {
-        isIn: [['En Proceso', 'Contratado', 'Rechazado', 'Entrevista']]
+        isIn: [['En revisión', 'Entrevista', 'Rechazado', 'Contratado']]
       }
     },
     id_vacante: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    id_empleado: {
+    id_candidato: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
@@ -34,22 +34,15 @@ module.exports = (sequelize, DataTypes) => {
     },
     fecha_creacion: {
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      allowNull: true
-    },
-    actualizado_por: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    fecha_actualizacion: {
-      type: DataTypes.DATE,
       allowNull: true
     },
   }, {
     tableName: 'aplicaciones',
-    timestamps: false,
+    timestamps: true, // Habilitar para que maneje fecha_creacion
+    createdAt: 'fecha_aplicacion', // La BD usa fecha_aplicacion como timestamp de creación
+    updatedAt: false, // No hay columna de actualización
     indexes: [
-      { fields: ['id_vacante', 'id_empleado'] }
+      { fields: ['id_vacante', 'id_candidato'] }
     ]
   });
 
@@ -61,19 +54,14 @@ module.exports = (sequelize, DataTypes) => {
       as: 'vacante'
     });
 
-    Aplicaciones.belongsTo(models.Empleados, {
-      foreignKey: 'id_empleado',
-      as: 'empleado'
+    Aplicaciones.belongsTo(models.Candidatos, {
+      foreignKey: 'id_candidato',
+      as: 'candidato'
     });
 
     Aplicaciones.belongsTo(models.Usuarios, {
       foreignKey: 'creado_por',
       as: 'creador'
-    });
-
-    Aplicaciones.belongsTo(models.Usuarios, {
-      foreignKey: 'actualizado_por',
-      as: 'actualizador'
     });
   };
 

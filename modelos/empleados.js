@@ -71,18 +71,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    estado_empleo: {
-      type: DataTypes.STRING(20),
+    estadoEmpleado: {
+      type: DataTypes.BOOLEAN,
       allowNull: false,
-<<<<<<< HEAD
-      defaultValue: 'Activo',
-      validate: {
-        isIn: [['Activo', 'Inactivo', 'Suspendido', 'Jubilado']]
-      }
-=======
       defaultValue: true,
       field: 'estadoempleado' // Mapea a la columna correcta 'estadoempleado'
->>>>>>> 4c225b4 (manejaretodo lo de modulo1)
     },
     creado_por: {
       type: DataTypes.INTEGER,

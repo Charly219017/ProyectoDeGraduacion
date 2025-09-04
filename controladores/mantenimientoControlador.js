@@ -12,13 +12,10 @@ const Sequelize = require('sequelize');
 const obtenerTodosUsuarios = async (req, res) => {
   try {
     const usuarios = await Usuarios.findAll({
-<<<<<<< HEAD
-=======
       // Añadimos la condición para filtrar solo usuarios activos (corregido)
       where: {
-        estado_usuario: true
+        estadoUsuario: true
       },
->>>>>>> 4c225b4 (manejaretodo lo de modulo1)
       attributes: { exclude: ['contrasena_hash'] },
       include: [{ 
         model: Roles, 
@@ -156,43 +153,26 @@ const eliminarUsuario = async (req, res) => {
       return res.status(404).json({ mensaje: 'Usuario no encontrado' });
     }
 
-<<<<<<< HEAD
-    //Se usa el campo 'descripcion' y se serializa el objeto JSON
-=======
     // Borrado lógico: cambiar el estado a false (inactivo)
     await usuarioAEliminar.update({
-      estado_usuario: false, // Usamos la nueva columna (corregido)
+      estadoUsuario: false,
       actualizado_por: req.usuario.id,
       fecha_actualizacion: new Date()
     });
 
-    // Almacenando un objeto JSON completo en el campo de descripción
-    const logData = {
-      mensaje: `Desactivación de usuario: ${usuarioAEliminar.nombre_usuario}`,
-      usuario_eliminado: {
-        id: usuarioAEliminar.id_usuario,
-        nombre: usuarioAEliminar.nombre_usuario
-      },
-      realizado_por: {
-        id: req.usuario.id,
-        nombre: req.usuario.nombre_usuario
-      }
-    };
->>>>>>> 4c225b4 (manejaretodo lo de modulo1)
     await Auditoria.create({
-      accion: 'ELIMINAR_USUARIO',
+      accion: 'ELIMINAR_USUARIO (LÓGICO)',
       usuario: req.usuario.id,
       descripcion: JSON.stringify({
-        mensaje: `Eliminación de usuario: ${usuarioAEliminar.nombre_usuario}`,
+        mensaje: `Desactivación de usuario: ${usuarioAEliminar.nombre_usuario}`,
         usuario_eliminado: usuarioAEliminar.id_usuario,
       }),
       tabla_afectada: 'usuarios',
       id_registro_afectado: usuarioAEliminar.id_usuario
     });
 
-    await usuarioAEliminar.destroy();
     logger.info(`Usuario eliminado exitosamente: ${usuarioAEliminar.nombre_usuario} por ${req.usuario.nombre_usuario}`);
-    res.json({ mensaje: 'Usuario eliminado exitosamente' });
+    res.json({ mensaje: 'Usuario desactivado exitosamente' });
   } catch (error) {
     logger.error(`Error al eliminar usuario: ${req.params.id_usuario}: `, error);
     res.status(500).json({ mensaje: 'Error interno del servidor' });

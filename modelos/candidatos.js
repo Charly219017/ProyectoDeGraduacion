@@ -8,55 +8,47 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       allowNull: false
     },
-    id_empleado: {
-      type: DataTypes.INTEGER,
-      allowNull: false
+    nombre_completo: {
+      type: DataTypes.STRING(100),
+      allowNull: true
     },
-    estado_candidatura: {
-      type: DataTypes.STRING(50),
-      allowNull: false,
-      defaultValue: 'En Revisión'
+    correo: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      validate: {
+        isEmail: true
+      }
+    },
+    telefono: {
+      type: DataTypes.STRING(20),
+      allowNull: true
+    },
+    cv_url: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    fecha_aplicacion: {
+      type: DataTypes.DATEONLY,
+      defaultValue: DataTypes.NOW,
+      allowNull: true
     },
     creado_por: {
       type: DataTypes.INTEGER,
       allowNull: true
     },
-    fecha_creacion: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      allowNull: true
-    },
-    actualizado_por: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    fecha_actualizacion: {
-      type: DataTypes.DATE,
-      allowNull: true
-    }
   }, {
     tableName: 'candidatos',
-    timestamps: false
+    timestamps: true,
+    createdAt: 'fecha_creacion',
+    updatedAt: false
   });
 
   // Las asociaciones se definen en una función 'associate' que se llamará desde index.js
   Candidatos.associate = (models) => {
-    // Un candidato pertenece a un empleado
-    Candidatos.belongsTo(models.Empleados, {
-      foreignKey: 'id_empleado',
-      as: 'empleado'
-    });
-
     // Un candidato pertenece a un usuario que lo creó
     Candidatos.belongsTo(models.Usuarios, {
       foreignKey: 'creado_por',
       as: 'creador'
-    });
-
-    // Un candidato pertenece a un usuario que lo actualizó
-    Candidatos.belongsTo(models.Usuarios, {
-      foreignKey: 'actualizado_por',
-      as: 'actualizador'
     });
   };
 

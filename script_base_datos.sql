@@ -40,20 +40,6 @@ CREATE TABLE IF NOT EXISTS carreras (
     creado_por INTEGER,
     fecha_creacion TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     actualizado_por INTEGER,
-<<<<<<< HEAD
-    fecha_actualizacion TIMESTAMP WITHOUT TIME ZONE
-);
-
--- Tabla de Usuarios
-CREATE TABLE public.usuarios (
-    id_usuario SERIAL PRIMARY KEY,
-    nombre_usuario VARCHAR(50) NOT NULL UNIQUE,
-    correo VARCHAR(100) NOT NULL UNIQUE,
-    contrasena_hash TEXT NOT NULL,
-    id_rol INTEGER NOT NULL,
-    fecha_creacion TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-=======
->>>>>>> 4c225b4 (manejaretodo lo de modulo1)
     fecha_actualizacion TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT fk_creado_por_carreras FOREIGN KEY (creado_por) REFERENCES usuarios (id_usuario),
     CONSTRAINT fk_actualizado_por_carreras FOREIGN KEY (actualizado_por) REFERENCES usuarios (id_usuario)
@@ -235,8 +221,6 @@ CREATE TABLE IF NOT EXISTS nomina (
     CONSTRAINT fk_actualizado_por_nomina FOREIGN KEY (actualizado_por) REFERENCES usuarios (id_usuario)
 );
 
-<<<<<<< HEAD
-=======
 -- TABLA: vacaciones
 CREATE TABLE IF NOT EXISTS vacaciones (
     id_vacacion SERIAL PRIMARY KEY,
@@ -252,4 +236,3 @@ CREATE TABLE IF NOT EXISTS vacaciones (
     CONSTRAINT fk_creado_por_vacaciones FOREIGN KEY (creado_por) REFERENCES usuarios (id_usuario),
     CONSTRAINT fk_actualizado_por_vacaciones FOREIGN KEY (actualizado_por) REFERENCES usuarios (id_usuario)
 );
->>>>>>> 4c225b4 (manejaretodo lo de modulo1)
