@@ -1,5 +1,7 @@
 // carpeta backend/modelos/auditoria.js
 
+const { text } = require("express");
+
 module.exports = (sequelize, DataTypes) => {
   const Auditoria = sequelize.define('Auditoria', {
     id_log: {
@@ -8,35 +10,45 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       allowNull: false
     },
-    // Nombre del campo en el modelo para el ID de usuario
-    usuario: { 
-      type: DataTypes.INTEGER,
-      // La columna en la BD se llama 'usuario', no necesitamos 'field'
-      allowNull: true,
-    },
-    accion: {
-      type: DataTypes.STRING(50),
-      allowNull: false
-    },
     tabla_afectada: {
       type: DataTypes.STRING(100),
       allowNull: true
     },
-    id_registro_afectado: {
-      type: DataTypes.INTEGER,
-      field: 'id_registro',
-      allowNull: true
+        
+    id_registro_tex: {
+      type: DataTypes.TEXT,
+      allowNull: true 
     },
-    // Se corrige a 'descripcion' y se usa el tipo de dato TEXT
-    descripcion: { 
+    campo_modificado: {
+      type:  DataTypes.TEXT,
+      allowNull: true 
+    },
+    valor_anterior: {
       type: DataTypes.TEXT,
       allowNull: true
     },
-    // Se cambia el nombre del campo a 'fecha' para que coincida con la BD
+    valor_nuevo: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+
+    accion: {
+      type: DataTypes.STRING(50),
+      allowNull: true
+    },
+    usuario: { 
+      type: DataTypes.INTEGER,
+      
+      allowNull: true,
+    },
     fecha: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATE(6),
       defaultValue: DataTypes.NOW,
       allowNull: false
+    }, 
+    descripcion: { 
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   }, {
     tableName: 'auditoria',

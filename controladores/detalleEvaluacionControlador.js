@@ -18,15 +18,15 @@ const crearDetalleEvaluacion = async (req, res) => {
 
         const nuevoDetalle = await DetalleEvaluacion.create({
             ...req.body,
-            creado_por: req.usuario.id_usuario
+            creado_por: req.usuario.id
         });
 
         await Auditoria.create({
             tabla_afectada: 'detalle_evaluacion',
             id_registro: nuevoDetalle.id_detalle,
             accion: 'CREAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Creación de nuevo detalle para la evaluación ID ${nuevoDetalle.id_evaluacion}`
+            usuario: req.usuario.id,
+            descripcion: JSON.stringify({ mensaje: `Creación de nuevo detalle para la evaluación ID ${nuevoDetalle.id_evaluacion}` })
         });
 
         logger.info(`Detalle de evaluación creado exitosamente con ID: ${nuevoDetalle.id_detalle} por ${req.usuario.nombre_usuario}`);
@@ -47,7 +47,7 @@ const crearDetalleEvaluacion = async (req, res) => {
 const obtenerTodosDetallesEvaluacion = async (req, res) => {
     try {
         const { id_evaluacion } = req.query; // Filtrar por query param
-        const whereClause = {};
+        const whereClause = { activo: true };
         if (id_evaluacion) {
             whereClause.id_evaluacion = id_evaluacion;
         }
@@ -85,7 +85,7 @@ const obtenerDetalleEvaluacionPorId = async (req, res) => {
             ]
         });
 
-        if (!detalle) {
+        if (!detalle || !detalle.activo) {
             return res.status(404).json({ mensaje: 'Detalle de evaluación no encontrado' });
         }
 
@@ -124,8 +124,8 @@ const actualizarDetalleEvaluacion = async (req, res) => {
             tabla_afectada: 'detalle_evaluacion',
             id_registro: detalleAActualizar.id_detalle,
             accion: 'ACTUALIZAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Actualización de detalle de evaluación con ID: ${detalleAActualizar.id_detalle}`
+            usuario: req.usuario.id,
+            descripcion: JSON.stringify({ mensaje: `Actualización de detalle de evaluación con ID: ${detalleAActualizar.id_detalle}` })
         });
 
         logger.info(`Detalle de evaluación con ID ${id_detalle} actualizado por ${req.usuario.nombre_usuario}`);
@@ -148,21 +148,23 @@ const eliminarDetalleEvaluacion = async (req, res) => {
         const { id_detalle } = req.params;
         const detalleAEliminar = await DetalleEvaluacion.findByPk(id_detalle);
 
-        if (!detalleAEliminar) {
+        if (!detalleAEliminar || !detalleAEliminar.activo) {
             return res.status(404).json({ mensaje: 'Detalle de evaluación no encontrado' });
         }
 
-        await detalleAEliminar.destroy();
+        // Borrado lógico
+        await detalleAEliminar.update({ activo: false });
 
         await Auditoria.create({
             tabla_afectada: 'detalle_evaluacion',
             id_registro: id_detalle,
             accion: 'ELIMINAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Eliminación de detalle de evaluación con ID: ${id_detalle}`
+            usuario: req.usuario.id,
+            valor_anterior: JSON.stringify(detalleAEliminar),
+            descripcion: JSON.stringify({ mensaje: `Eliminación lógica de detalle de evaluación con ID: ${id_detalle}` })
         });
 
-        logger.info(`Detalle de evaluación con ID ${id_detalle} eliminado por ${req.usuario.nombre_usuario}`);
+        logger.info(`Detalle de evaluación con ID ${id_detalle} eliminado lógicamente por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Detalle de evaluación eliminado exitosamente' });
 
     } catch (error) {

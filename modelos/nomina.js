@@ -10,12 +10,10 @@ module.exports = (sequelize, DataTypes) => {
     id_empleado: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      unique: 'nomina_unica', // Restricción de unicidad compuesta
     },
     mes: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      unique: 'nomina_unica', // Mismo nombre para la restricción
+      allowNull: true,
       validate: {
         min: 1,
         max: 12
@@ -23,8 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     anio: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      unique: 'nomina_unica', // Mismo nombre para la restricción
+      allowNull: true,
       validate: {
         min: 2000
       }
@@ -61,7 +58,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     fecha_generacion: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
       defaultValue: DataTypes.NOW
     },
     creado_por: {
@@ -75,15 +72,16 @@ module.exports = (sequelize, DataTypes) => {
     fecha_actualizacion: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    activo: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+      allowNull: true
     }
   }, {
     tableName: 'nomina',
     timestamps: false,
-    indexes: [
-      { fields: ['id_empleado'] },
-      { fields: ['mes', 'anio'] },
-      { fields: ['fecha_generacion'] }
-    ]
+
   });
 
   // Las asociaciones se definen en una función 'associate' que se llamará desde index.js

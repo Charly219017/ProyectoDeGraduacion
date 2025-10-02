@@ -1,6 +1,6 @@
 // carpeta: controladores/puestoControlador.js
 const { validationResult } = require('express-validator');
-const { Puestos, Departamentos, Auditoria, Usuarios } = require('../modelos');
+const { Puestos, Carreras, Auditoria, Usuarios } = require('../modelos');
 const logger = require('../utilidades/logger');
 
 /**
@@ -50,9 +50,10 @@ const crearPuesto = async (req, res) => {
  */
 const obtenerTodosPuestos = async (req, res) => {
     try {
-        const puestos = await Puestos.findAll({ // Se elimina el filtro de estado ya que la columna no existe en la BD
+        const puestos = await Puestos.findAll({ 
+            where: { activo: true },
             include: [
-                { model: Departamentos, as: 'departamento' },
+                { model: Carreras, as: 'carrera' },
                 { model: Usuarios, as: 'creador' },
                 { model: Usuarios, as: 'actualizador' }
             ]
@@ -75,13 +76,13 @@ const obtenerPuestoPorId = async (req, res) => {
         const { id_puesto } = req.params;
         const puesto = await Puestos.findByPk(id_puesto, {
             include: [
-                { model: Departamentos, as: 'departamento' },
+                { model: Carreras, as: 'carrera' },
                 { model: Usuarios, as: 'creador' },
                 { model: Usuarios, as: 'actualizador' }
             ]
         });
 
-        if (!puesto) {
+        if (!puesto || !puesto.activo) {
             return res.status(404).json({ mensaje: 'Puesto no encontrado' });
         }
 
@@ -110,14 +111,13 @@ const actualizarPuesto = async (req, res) => {
         const { id_puesto } = req.params;
         const puestoAActualizar = await Puestos.findByPk(id_puesto);
 
-        if (!puestoAActualizar) {
+        if (!puestoAActualizar || !puestoAActualizar.activo) {
             return res.status(404).json({ mensaje: 'Puesto no encontrado' });
         }
 
         await puestoAActualizar.update({
             ...req.body,
-            actualizado_por: req.usuario.id,
-            fecha_actualizacion: new Date()
+            actualizado_por: req.usuario.id
         });
 
         // Registrar la acción en la tabla de auditoría
@@ -153,12 +153,15 @@ const eliminarPuesto = async (req, res) => {
         const { id_puesto } = req.params;
         const puestoAEliminar = await Puestos.findByPk(id_puesto);
 
-        if (!puestoAEliminar) {
+        if (!puestoAEliminar || !puestoAEliminar.activo) {
             return res.status(404).json({ mensaje: 'Puesto no encontrado' });
         }
 
-        // Borrado físico, ya que la tabla no tiene campo de estado
-        await puestoAEliminar.destroy();
+        // Borrado lógico usando el campo activo
+        await puestoAEliminar.update({
+            activo: false,
+            actualizado_por: req.usuario.id
+        });
 
         // Registrar la acción en la tabla de auditoría
         await Auditoria.create({

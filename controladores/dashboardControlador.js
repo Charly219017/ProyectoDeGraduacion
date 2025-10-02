@@ -15,7 +15,7 @@ const obtenerEstadisticas = async (req, res) => {
       vacacionesPendientes,
       // evaluacionesPendientes, // Se comenta porque el modelo/tabla Evaluaciones no existe o no tiene la columna 'estado'
     ] = await Promise.all([
-      Empleados.count({ where: { estadoempleado: true } }), // Corregido para usar el nombre de columna de la BD
+      Empleados.count({ where: { activo: true } }),
       Empleados.count(),
       Vacaciones.count({ where: { estado: 'Aprobada' } }),
       Vacaciones.count({ where: { estado: 'Pendiente' } }),

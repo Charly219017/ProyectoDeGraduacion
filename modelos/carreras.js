@@ -10,11 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     nombre_carrera: {
       type: DataTypes.STRING(100),
       allowNull: false,
-      unique: true,
-      validate: {
-        notEmpty: true,
-        len: [1, 100]
-      }
+      unique: true
     },
     creado_por: {
       type: DataTypes.INTEGER,
@@ -33,9 +29,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true
     },
+    activo: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
+    }
   }, {
     tableName: 'carreras',
-    timestamps: false,
+    timestamps: true,
+    createdAt: 'fecha_creacion',
+    updatedAt: 'fecha_actualizacion'
   });
 
   // Las asociaciones se definen en una función 'associate' que se llamará desde index.js

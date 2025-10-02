@@ -1,6 +1,6 @@
 // carpeta: controladores/vacanteControlador.js
 const { validationResult } = require('express-validator');
-const { Vacantes, Puestos, Usuarios, Auditoria } = require('../modelos');
+const { Vacantes, Puestos, Carreras, Usuarios, Auditoria } = require('../modelos');
 const logger = require('../utilidades/logger');
 
 /**
@@ -18,15 +18,15 @@ const crearVacante = async (req, res) => {
 
         const nuevaVacante = await Vacantes.create({
             ...req.body,
-            creado_por: req.usuario.id_usuario
+            creado_por: req.usuario.id
         });
 
         await Auditoria.create({
             tabla_afectada: 'vacantes',
             id_registro: nuevaVacante.id_vacante,
             accion: 'CREAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Creación de nueva vacante: ${nuevaVacante.titulo}`
+            usuario: req.usuario.id,
+            descripcion: JSON.stringify({ mensaje: `Creación de nueva vacante: ${nuevaVacante.titulo}` })
         });
 
         logger.info(`Vacante creada exitosamente: ${nuevaVacante.titulo} por ${req.usuario.nombre_usuario}`);
@@ -47,8 +47,16 @@ const crearVacante = async (req, res) => {
 const obtenerTodasVacantes = async (req, res) => {
     try {
         const vacantes = await Vacantes.findAll({
+            where: { activo: true },
             include: [
-                { model: Puestos, as: 'puesto' },
+                { 
+                    model: Puestos, 
+                    as: 'puesto',
+                    where: { activo: true },
+                    include: [
+                        { model: Carreras, as: 'carrera' }
+                    ]
+                },
                 { model: Usuarios, as: 'creador' },
                 { model: Usuarios, as: 'actualizador' }
             ]
@@ -72,13 +80,19 @@ const obtenerVacantePorId = async (req, res) => {
 
         const vacante = await Vacantes.findByPk(id_vacante, {
             include: [
-                { model: Puestos, as: 'puesto' },
+                { 
+                    model: Puestos, 
+                    as: 'puesto',
+                    include: [
+                        { model: Carreras, as: 'carrera' }
+                    ]
+                },
                 { model: Usuarios, as: 'creador' },
                 { model: Usuarios, as: 'actualizador' }
             ]
         });
 
-        if (!vacante) {
+        if (!vacante || !vacante.activo) {
             return res.status(404).json({ mensaje: 'Vacante no encontrada' });
         }
 
@@ -107,22 +121,21 @@ const actualizarVacante = async (req, res) => {
         const { id_vacante } = req.params;
         const vacanteAActualizar = await Vacantes.findByPk(id_vacante);
 
-        if (!vacanteAActualizar) {
+        if (!vacanteAActualizar || !vacanteAActualizar.activo) {
             return res.status(404).json({ mensaje: 'Vacante no encontrada' });
         }
 
         await vacanteAActualizar.update({
             ...req.body,
-            actualizado_por: req.usuario.id_usuario,
-            fecha_actualizacion: new Date()
+            actualizado_por: req.usuario.id
         });
 
         await Auditoria.create({
             tabla_afectada: 'vacantes',
             id_registro: vacanteAActualizar.id_vacante,
             accion: 'ACTUALIZAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Actualización de vacante con ID: ${vacanteAActualizar.id_vacante}`
+            usuario: req.usuario.id,
+            descripcion: JSON.stringify({ mensaje: `Actualización de vacante con ID: ${vacanteAActualizar.id_vacante}` })
         });
 
         logger.info(`Vacante con ID ${id_vacante} actualizada por ${req.usuario.nombre_usuario}`);
@@ -145,18 +158,23 @@ const eliminarVacante = async (req, res) => {
         const { id_vacante } = req.params;
         const vacanteAEliminar = await Vacantes.findByPk(id_vacante);
 
-        if (!vacanteAEliminar) {
+        if (!vacanteAEliminar || !vacanteAEliminar.activo) {
             return res.status(404).json({ mensaje: 'Vacante no encontrada' });
         }
 
-        await vacanteAEliminar.destroy();
+        // Borrado lógico usando el campo activo
+        await vacanteAEliminar.update({
+            activo: false,
+            actualizado_por: req.usuario.id,
+            fecha_actualizacion: new Date()
+        });
 
         await Auditoria.create({
             tabla_afectada: 'vacantes',
             id_registro: id_vacante,
             accion: 'ELIMINAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Eliminación de vacante con ID: ${id_vacante}`
+            usuario: req.usuario.id,
+            descripcion: JSON.stringify({ mensaje: `Eliminación de vacante con ID: ${id_vacante}` })
         });
 
         logger.info(`Vacante con ID ${id_vacante} eliminada por ${req.usuario.nombre_usuario}`);

@@ -18,15 +18,16 @@ const crearCandidato = async (req, res) => {
 
         const nuevoCandidato = await Candidatos.create({
             ...req.body,
-            creado_por: req.usuario.id_usuario
+            creado_por: req.usuario.id
         });
 
         await Auditoria.create({
             tabla_afectada: 'candidatos',
             id_registro: nuevoCandidato.id_candidato,
             accion: 'CREAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Creación de nuevo candidato: ${nuevoCandidato.nombre_completo}`
+            usuario: req.usuario.id,
+            valor_nuevo: JSON.stringify(nuevoCandidato),
+            descripcion: JSON.stringify({ mensaje: `Creación de nuevo candidato: ${nuevoCandidato.nombre_completo}` })
         });
 
         logger.info(`Candidato creado exitosamente: ${nuevoCandidato.nombre_completo} por ${req.usuario.nombre_usuario}`);
@@ -47,6 +48,7 @@ const crearCandidato = async (req, res) => {
 const obtenerTodosCandidatos = async (req, res) => {
     try {
         const candidatos = await Candidatos.findAll({
+            where: { activo: true },
             include: [
                 { model: Usuarios, as: 'creador' }
             ]
@@ -74,7 +76,7 @@ const obtenerCandidatoPorId = async (req, res) => {
             ]
         });
 
-        if (!candidato) {
+        if (!candidato || !candidato.activo) {
             return res.status(404).json({ mensaje: 'Candidato no encontrado' });
         }
 
@@ -103,9 +105,11 @@ const actualizarCandidato = async (req, res) => {
         const { id_candidato } = req.params;
         const candidatoAActualizar = await Candidatos.findByPk(id_candidato);
 
-        if (!candidatoAActualizar) {
+        if (!candidatoAActualizar || !candidatoAActualizar.activo) {
             return res.status(404).json({ mensaje: 'Candidato no encontrado' });
         }
+
+        const valorAnterior = { ...candidatoAActualizar.get({ plain: true }) };
 
         await candidatoAActualizar.update(req.body);
 
@@ -113,8 +117,10 @@ const actualizarCandidato = async (req, res) => {
             tabla_afectada: 'candidatos',
             id_registro: candidatoAActualizar.id_candidato,
             accion: 'ACTUALIZAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Actualización de candidato con ID: ${candidatoAActualizar.id_candidato}`
+            usuario: req.usuario.id,
+            valor_anterior: JSON.stringify(valorAnterior),
+            valor_nuevo: JSON.stringify(req.body),
+            descripcion: JSON.stringify({ mensaje: `Actualización de candidato con ID: ${candidatoAActualizar.id_candidato}` })
         });
 
         logger.info(`Candidato con ID ${id_candidato} actualizado por ${req.usuario.nombre_usuario}`);
@@ -137,18 +143,22 @@ const eliminarCandidato = async (req, res) => {
         const { id_candidato } = req.params;
         const candidatoAEliminar = await Candidatos.findByPk(id_candidato);
 
-        if (!candidatoAEliminar) {
+        if (!candidatoAEliminar || !candidatoAEliminar.activo) {
             return res.status(404).json({ mensaje: 'Candidato no encontrado' });
         }
 
-        await candidatoAEliminar.destroy();
+        // Borrado lógico usando el campo activo
+        await candidatoAEliminar.update({
+            activo: false
+        });
 
         await Auditoria.create({
             tabla_afectada: 'candidatos',
             id_registro: id_candidato,
             accion: 'ELIMINAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Eliminación de candidato con ID: ${id_candidato}`
+            usuario: req.usuario.id,
+            valor_anterior: JSON.stringify(candidatoAEliminar),
+            descripcion: JSON.stringify({ mensaje: `Eliminación de candidato con ID: ${id_candidato}` })
         });
 
         logger.info(`Candidato con ID ${id_candidato} eliminado por ${req.usuario.nombre_usuario}`);

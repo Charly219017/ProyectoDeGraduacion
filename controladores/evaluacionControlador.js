@@ -18,15 +18,15 @@ const crearEvaluacion = async (req, res) => {
 
         const nuevaEvaluacion = await Evaluaciones.create({
             ...req.body,
-            creado_por: req.usuario.id_usuario
+            creado_por: req.usuario.id
         });
 
         await Auditoria.create({
             tabla_afectada: 'evaluaciones',
             id_registro: nuevaEvaluacion.id_evaluacion,
             accion: 'CREAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Creación de nueva evaluación para el empleado ID ${nuevaEvaluacion.id_empleado}`
+            usuario: req.usuario.id,
+            descripcion: JSON.stringify({ mensaje: `Creación de nueva evaluación para el empleado ID ${nuevaEvaluacion.id_empleado}` })
         });
 
         logger.info(`Evaluación creada exitosamente con ID: ${nuevaEvaluacion.id_evaluacion} por ${req.usuario.nombre_usuario}`);
@@ -47,6 +47,7 @@ const crearEvaluacion = async (req, res) => {
 const obtenerTodasEvaluaciones = async (req, res) => {
     try {
         const evaluaciones = await Evaluaciones.findAll({
+            where: { activo: true },
             include: [
                 { model: Empleados, as: 'empleado' },
                 { model: Usuarios, as: 'creador' }
@@ -76,7 +77,7 @@ const obtenerEvaluacionPorId = async (req, res) => {
             ]
         });
 
-        if (!evaluacion) {
+        if (!evaluacion || !evaluacion.activo) {
             return res.status(404).json({ mensaje: 'Evaluación no encontrada' });
         }
 
@@ -115,8 +116,8 @@ const actualizarEvaluacion = async (req, res) => {
             tabla_afectada: 'evaluaciones',
             id_registro: evaluacionAActualizar.id_evaluacion,
             accion: 'ACTUALIZAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Actualización de evaluación con ID: ${evaluacionAActualizar.id_evaluacion}`
+            usuario: req.usuario.id,
+            descripcion: JSON.stringify({ mensaje: `Actualización de evaluación con ID: ${evaluacionAActualizar.id_evaluacion}` })
         });
 
         logger.info(`Evaluación con ID ${id_evaluacion} actualizada por ${req.usuario.nombre_usuario}`);
@@ -139,21 +140,23 @@ const eliminarEvaluacion = async (req, res) => {
         const { id_evaluacion } = req.params;
         const evaluacionAEliminar = await Evaluaciones.findByPk(id_evaluacion);
 
-        if (!evaluacionAEliminar) {
+        if (!evaluacionAEliminar || !evaluacionAEliminar.activo) {
             return res.status(404).json({ mensaje: 'Evaluación no encontrada' });
         }
 
-        await evaluacionAEliminar.destroy();
+        // Borrado lógico
+        await evaluacionAEliminar.update({ activo: false });
 
         await Auditoria.create({
             tabla_afectada: 'evaluaciones',
             id_registro: id_evaluacion,
             accion: 'ELIMINAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Eliminación de evaluación con ID: ${id_evaluacion}`
+            usuario: req.usuario.id,
+            valor_anterior: JSON.stringify(evaluacionAEliminar),
+            descripcion: JSON.stringify({ mensaje: `Eliminación lógica de evaluación con ID: ${id_evaluacion}` })
         });
 
-        logger.info(`Evaluación con ID ${id_evaluacion} eliminada por ${req.usuario.nombre_usuario}`);
+        logger.info(`Evaluación con ID ${id_evaluacion} eliminada lógicamente por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Evaluación eliminada exitosamente' });
 
     } catch (error) {

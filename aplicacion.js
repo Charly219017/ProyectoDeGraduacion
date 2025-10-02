@@ -50,6 +50,11 @@ app.use(helmet({
     },
   },
   crossOriginEmbedderPolicy: false,
+  // Configuración de HSTS (HTTP Strict Transport Security)
+  // Fuerza a los clientes (navegadores) a usar solo HTTPS por el tiempo especificado.
+  // 'maxAge' está en segundos (ej: 1 año). 'includeSubDomains' aplica la política a todos los subdominios.
+  // ¡ADVERTENCIA! Habilitar solo cuando el sitio esté funcionando correctamente con HTTPS.
+  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
 }));
 
 // Configuración de CORS

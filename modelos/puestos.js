@@ -31,25 +31,23 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+     actualizado_por: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     fecha_creacion: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
       allowNull: true
     },
-    actualizado_por: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
     fecha_actualizacion: {
       type: DataTypes.DATE,
       allowNull: true
     },
-    estado_puesto: {
+    activo: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: true,
-      field: 'estado_puesto'
-    },
+      defaultValue: true
+    }
   }, {
     tableName: 'puestos',
     timestamps: true, // Habilitar timestamps para que Sequelize maneje fecha_creacion y fecha_actualizacion
@@ -57,19 +55,15 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: 'fecha_actualizacion',
   });
 
-  // Las asociaciones se definen en una función 'associate' que se llamará desde index.js
   Puestos.associate = (models) => {
-    // Un puesto pertenece a una carrera
     Puestos.belongsTo(models.Carreras, {
       foreignKey: 'id_carrera',
       as: 'carrera'
     });
-    // Un puesto pertenece a un usuario que lo creó
     Puestos.belongsTo(models.Usuarios, {
       foreignKey: 'creado_por',
       as: 'creador'
     });
-    // Un puesto pertenece a un usuario que lo actualizó
     Puestos.belongsTo(models.Usuarios, {
       foreignKey: 'actualizado_por',
       as: 'actualizador'

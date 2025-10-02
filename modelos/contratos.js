@@ -38,18 +38,22 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true
     },
+      actualizado_por: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     fecha_creacion: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
-      allowNull: false
-    },
-    actualizado_por: {
-      type: DataTypes.INTEGER,
       allowNull: true
     },
     fecha_actualizacion: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    activo: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
     }
   }, {
     tableName: 'contratos',

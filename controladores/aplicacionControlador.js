@@ -16,17 +16,21 @@ const crearAplicacion = async (req, res) => {
             });
         }
 
+        // Excluir fecha_aplicacion del cuerpo para que la BD la genere
+        const { fecha_aplicacion, ...datosAplicacion } = req.body;
+
         const nuevaAplicacion = await Aplicaciones.create({
-            ...req.body,
-            creado_por: req.usuario.id_usuario
+            ...datosAplicacion,
+            creado_por: req.usuario.id
         });
 
         await Auditoria.create({
             tabla_afectada: 'aplicaciones',
             id_registro: nuevaAplicacion.id_aplicacion,
             accion: 'CREAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Creación de nueva aplicación para la vacante ID ${nuevaAplicacion.id_vacante} por el candidato ID ${nuevaAplicacion.id_candidato}`
+            usuario: req.usuario.id,
+            valor_nuevo: JSON.stringify(nuevaAplicacion),
+            descripcion: JSON.stringify({ mensaje: `Creación de nueva aplicación con ID: ${nuevaAplicacion.id_aplicacion}` })
         });
 
         logger.info(`Aplicación creada exitosamente con ID: ${nuevaAplicacion.id_aplicacion} por ${req.usuario.nombre_usuario}`);
@@ -47,9 +51,19 @@ const crearAplicacion = async (req, res) => {
 const obtenerTodasAplicaciones = async (req, res) => {
     try {
         const aplicaciones = await Aplicaciones.findAll({
+            attributes: ['id_aplicacion', 'id_vacante', 'id_candidato', 'estado_aplicacion', 'observaciones', 'fecha_aplicacion', 'creado_por', 'activo'],
+            where: { activo: true },
             include: [
-                { model: Vacantes, as: 'vacante' },
-                { model: Candidatos, as: 'candidato' },
+                { 
+                    model: Vacantes, 
+                    as: 'vacante',
+                    where: { activo: true }
+                },
+                { 
+                    model: Candidatos, 
+                    as: 'candidato',
+                    where: { activo: true }
+                },
                 { model: Usuarios, as: 'creador' }
             ]
         });
@@ -71,14 +85,23 @@ const obtenerAplicacionPorId = async (req, res) => {
         const { id_aplicacion } = req.params;
 
         const aplicacion = await Aplicaciones.findByPk(id_aplicacion, {
+            attributes: ['id_aplicacion', 'id_vacante', 'id_candidato', 'estado_aplicacion', 'observaciones', 'fecha_aplicacion', 'creado_por', 'activo'],
             include: [
-                { model: Vacantes, as: 'vacante' },
-                { model: Candidatos, as: 'candidato' },
+                { 
+                    model: Vacantes, 
+                    as: 'vacante',
+                    where: { activo: true }
+                },
+                { 
+                    model: Candidatos, 
+                    as: 'candidato',
+                    where: { activo: true }
+                },
                 { model: Usuarios, as: 'creador' }
             ]
         });
 
-        if (!aplicacion) {
+        if (!aplicacion || !aplicacion.activo) {
             return res.status(404).json({ mensaje: 'Aplicación no encontrada' });
         }
 
@@ -107,18 +130,25 @@ const actualizarAplicacion = async (req, res) => {
         const { id_aplicacion } = req.params;
         const aplicacionAActualizar = await Aplicaciones.findByPk(id_aplicacion);
 
-        if (!aplicacionAActualizar) {
+        if (!aplicacionAActualizar || !aplicacionAActualizar.activo) {
             return res.status(404).json({ mensaje: 'Aplicación no encontrada' });
         }
 
-        await aplicacionAActualizar.update(req.body);
+        const valorAnterior = { ...aplicacionAActualizar.get({ plain: true }) };
+
+        // Excluir fecha_aplicacion para evitar que se actualice
+        const { fecha_aplicacion, ...datosActualizacion } = req.body;
+
+        await aplicacionAActualizar.update(datosActualizacion);
 
         await Auditoria.create({
             tabla_afectada: 'aplicaciones',
             id_registro: aplicacionAActualizar.id_aplicacion,
             accion: 'ACTUALIZAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Actualización de aplicación con ID: ${aplicacionAActualizar.id_aplicacion}`
+            usuario: req.usuario.id,
+            valor_anterior: JSON.stringify(valorAnterior),
+            valor_nuevo: JSON.stringify(datosActualizacion),
+            descripcion: JSON.stringify({ mensaje: `Actualización de aplicación con ID: ${aplicacionAActualizar.id_aplicacion}` })
         });
 
         logger.info(`Aplicación con ID ${id_aplicacion} actualizada por ${req.usuario.nombre_usuario}`);
@@ -141,18 +171,22 @@ const eliminarAplicacion = async (req, res) => {
         const { id_aplicacion } = req.params;
         const aplicacionAEliminar = await Aplicaciones.findByPk(id_aplicacion);
 
-        if (!aplicacionAEliminar) {
+        if (!aplicacionAEliminar || !aplicacionAEliminar.activo) {
             return res.status(404).json({ mensaje: 'Aplicación no encontrada' });
         }
 
-        await aplicacionAEliminar.destroy();
+        // Borrado lógico usando el campo activo
+        await aplicacionAEliminar.update({
+            activo: false
+        });
 
         await Auditoria.create({
             tabla_afectada: 'aplicaciones',
             id_registro: id_aplicacion,
             accion: 'ELIMINAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Eliminación de aplicación con ID: ${id_aplicacion}`
+            usuario: req.usuario.id,
+            valor_anterior: JSON.stringify(aplicacionAEliminar),
+            descripcion: JSON.stringify({ mensaje: `Eliminación de aplicación con ID: ${id_aplicacion}` })
         });
 
         logger.info(`Aplicación con ID ${id_aplicacion} eliminada por ${req.usuario.nombre_usuario}`);

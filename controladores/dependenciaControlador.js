@@ -22,8 +22,8 @@ const crearDependencia = async (req, res) => {
             tabla_afectada: 'dependencias',
             id_registro: nuevaDependencia.id_dependencia,
             accion: 'CREAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Creación de nueva dependencia: puesto superior ${nuevaDependencia.id_puesto_superior} -> puesto subordinado ${nuevaDependencia.id_puesto_subordinado}`
+            usuario: req.usuario.id,
+            descripcion: JSON.stringify({ mensaje: `Creación de nueva dependencia: puesto superior ${nuevaDependencia.id_puesto_superior} -> puesto subordinado ${nuevaDependencia.id_puesto_subordinado}` })
         });
 
         logger.info(`Dependencia creada exitosamente con ID: ${nuevaDependencia.id_dependencia} por ${req.usuario.nombre_usuario}`);
@@ -112,8 +112,8 @@ const actualizarDependencia = async (req, res) => {
             tabla_afectada: 'dependencias',
             id_registro: dependenciaAActualizar.id_dependencia,
             accion: 'ACTUALIZAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Actualización de dependencia con ID: ${dependenciaAActualizar.id_dependencia}`
+            usuario: req.usuario.id,
+            descripcion: JSON.stringify({ mensaje: `Actualización de dependencia con ID: ${dependenciaAActualizar.id_dependencia}` })
         });
 
         logger.info(`Dependencia con ID ${id_dependencia} actualizada por ${req.usuario.nombre_usuario}`);
@@ -146,8 +146,8 @@ const eliminarDependencia = async (req, res) => {
             tabla_afectada: 'dependencias',
             id_registro: id_dependencia,
             accion: 'ELIMINAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Eliminación de dependencia con ID: ${id_dependencia}`
+            usuario: req.usuario.id,
+            descripcion: JSON.stringify({ mensaje: `Eliminación de dependencia con ID: ${id_dependencia}` })
         });
 
         logger.info(`Dependencia con ID ${id_dependencia} eliminada por ${req.usuario.nombre_usuario}`);

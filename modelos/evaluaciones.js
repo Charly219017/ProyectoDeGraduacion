@@ -42,19 +42,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    fecha_creacion: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW
+    activo: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+      allowNull: true
     }
   }, {
     tableName: 'evaluaciones',
-    timestamps: false,
-    indexes: [
-      { fields: ['id_empleado'] },
-      { fields: ['fecha_evaluacion'] },
-      { fields: ['creado_por'] }
-    ]
+    timestamps: true,
+    createdAt: 'fecha_creacion',
+    updatedAt: false
   });
 
   // Las asociaciones se definen en una función 'associate' que se llamará desde index.js

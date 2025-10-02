@@ -18,15 +18,16 @@ const crearCriterio = async (req, res) => {
 
         const nuevoCriterio = await Criterios.create({
             ...req.body,
-            creado_por: req.usuario.id_usuario
+            creado_por: req.usuario.id
         });
 
         await Auditoria.create({
             tabla_afectada: 'criterios',
             id_registro: nuevoCriterio.id_criterio,
             accion: 'CREAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Creación de nuevo criterio: ${nuevoCriterio.nombre_criterio}`
+            usuario: req.usuario.id,
+            valor_nuevo: JSON.stringify(nuevoCriterio),
+            descripcion: JSON.stringify({ mensaje: `Creación de nuevo criterio: ${nuevoCriterio.nombre_criterio}` })
         });
 
         logger.info(`Criterio creado exitosamente: ${nuevoCriterio.nombre_criterio} por ${req.usuario.nombre_usuario}`);
@@ -47,6 +48,7 @@ const crearCriterio = async (req, res) => {
 const obtenerTodosCriterios = async (req, res) => {
     try {
         const criterios = await Criterios.findAll({
+            where: { activo: true },
             include: [
                 { model: Usuarios, as: 'creador' }
             ]
@@ -74,7 +76,7 @@ const obtenerCriterioPorId = async (req, res) => {
             ]
         });
 
-        if (!criterio) {
+        if (!criterio || !criterio.activo) {
             return res.status(404).json({ mensaje: 'Criterio no encontrado' });
         }
 
@@ -107,14 +109,18 @@ const actualizarCriterio = async (req, res) => {
             return res.status(404).json({ mensaje: 'Criterio no encontrado' });
         }
 
+        const valorAnterior = { ...criterioAActualizar.get({ plain: true }) };
+
         await criterioAActualizar.update(req.body);
 
         await Auditoria.create({
             tabla_afectada: 'criterios',
             id_registro: criterioAActualizar.id_criterio,
             accion: 'ACTUALIZAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Actualización de criterio con ID: ${criterioAActualizar.id_criterio}`
+            usuario: req.usuario.id,
+            valor_anterior: JSON.stringify(valorAnterior),
+            valor_nuevo: JSON.stringify(req.body),
+            descripcion: JSON.stringify({ mensaje: `Actualización de criterio con ID: ${criterioAActualizar.id_criterio}` })
         });
 
         logger.info(`Criterio con ID ${id_criterio} actualizado por ${req.usuario.nombre_usuario}`);
@@ -137,21 +143,23 @@ const eliminarCriterio = async (req, res) => {
         const { id_criterio } = req.params;
         const criterioAEliminar = await Criterios.findByPk(id_criterio);
 
-        if (!criterioAEliminar) {
+        if (!criterioAEliminar || !criterioAEliminar.activo) {
             return res.status(404).json({ mensaje: 'Criterio no encontrado' });
         }
 
-        await criterioAEliminar.destroy();
+        // Borrado lógico
+        await criterioAEliminar.update({ activo: false });
 
         await Auditoria.create({
             tabla_afectada: 'criterios',
             id_registro: id_criterio,
             accion: 'ELIMINAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Eliminación de criterio con ID: ${id_criterio}`
+            usuario: req.usuario.id,
+            valor_anterior: JSON.stringify(criterioAEliminar),
+            descripcion: JSON.stringify({ mensaje: `Eliminación lógica de criterio con ID: ${id_criterio}` })
         });
 
-        logger.info(`Criterio con ID ${id_criterio} eliminado por ${req.usuario.nombre_usuario}`);
+        logger.info(`Criterio con ID ${id_criterio} eliminado lógicamente por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Criterio eliminado exitosamente' });
 
     } catch (error) {

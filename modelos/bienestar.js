@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
     fecha_actividad: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false
     },
     creado_por: {
@@ -30,6 +30,11 @@ module.exports = (sequelize, DataTypes) => {
     fecha_creacion: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
+      allowNull: true
+    },
+    activo: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
       allowNull: true
     }
   }, {

@@ -18,15 +18,16 @@ const crearActividadBienestar = async (req, res) => {
 
         const nuevaActividad = await Bienestar.create({
             ...req.body,
-            creado_por: req.usuario.id_usuario
+            creado_por: req.usuario.id
         });
 
         await Auditoria.create({
             tabla_afectada: 'bienestar',
             id_registro: nuevaActividad.id_bienestar,
             accion: 'CREAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Creación de nueva actividad de bienestar: ${nuevaActividad.nombre_actividad}`
+            usuario: req.usuario.id,
+            valor_nuevo: JSON.stringify(nuevaActividad),
+            descripcion: JSON.stringify({ mensaje: `Creación de nueva actividad de bienestar: ${nuevaActividad.nombre_actividad}` })
         });
 
         logger.info(`Actividad de bienestar creada exitosamente: ${nuevaActividad.nombre_actividad} por ${req.usuario.nombre_usuario}`);
@@ -47,6 +48,7 @@ const crearActividadBienestar = async (req, res) => {
 const obtenerTodasActividadesBienestar = async (req, res) => {
     try {
         const actividades = await Bienestar.findAll({
+            where: { activo: true },
             include: [
                 { model: Usuarios, as: 'creador' }
             ]
@@ -74,7 +76,7 @@ const obtenerActividadBienestarPorId = async (req, res) => {
             ]
         });
 
-        if (!actividad) {
+        if (!actividad || !actividad.activo) {
             return res.status(404).json({ mensaje: 'Actividad de bienestar no encontrada' });
         }
 
@@ -103,9 +105,11 @@ const actualizarActividadBienestar = async (req, res) => {
         const { id_bienestar } = req.params;
         const actividadAActualizar = await Bienestar.findByPk(id_bienestar);
 
-        if (!actividadAActualizar) {
+        if (!actividadAActualizar || !actividadAActualizar.activo) {
             return res.status(404).json({ mensaje: 'Actividad de bienestar no encontrada' });
         }
+
+        const valorAnterior = { ...actividadAActualizar.get({ plain: true }) };
 
         // El modelo Bienestar no tiene campos de actualización, pero se deja la estructura por si se añaden en el futuro.
         await actividadAActualizar.update(req.body);
@@ -114,8 +118,10 @@ const actualizarActividadBienestar = async (req, res) => {
             tabla_afectada: 'bienestar',
             id_registro: actividadAActualizar.id_bienestar,
             accion: 'ACTUALIZAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Actualización de actividad de bienestar con ID: ${actividadAActualizar.id_bienestar}`
+            usuario: req.usuario.id,
+            valor_anterior: JSON.stringify(valorAnterior),
+            valor_nuevo: JSON.stringify(req.body),
+            descripcion: JSON.stringify({ mensaje: `Actualización de actividad de bienestar con ID: ${actividadAActualizar.id_bienestar}` })
         });
 
         logger.info(`Actividad de bienestar con ID ${id_bienestar} actualizada por ${req.usuario.nombre_usuario}`);
@@ -136,23 +142,26 @@ const actualizarActividadBienestar = async (req, res) => {
 const eliminarActividadBienestar = async (req, res) => {
     try {
         const { id_bienestar } = req.params;
-        const actividadAEliminar = await Bienestar.findByPk(id_bienestar);
+        const actividadAEliminar = await Bienestar.findOne({ 
+            where: { id_bienestar, activo: true } 
+        });
 
         if (!actividadAEliminar) {
             return res.status(404).json({ mensaje: 'Actividad de bienestar no encontrada' });
         }
 
-        await actividadAEliminar.destroy();
+        await actividadAEliminar.update({ activo: false });
 
         await Auditoria.create({
             tabla_afectada: 'bienestar',
             id_registro: id_bienestar,
-            accion: 'ELIMINAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Eliminación de actividad de bienestar con ID: ${id_bienestar}`
+            accion: 'ELIMINAR LÓGICAMENTE',
+            usuario: req.usuario.id,
+            valor_anterior: JSON.stringify(actividadAEliminar),
+            descripcion: JSON.stringify({ mensaje: `Eliminación lógica de actividad de bienestar con ID: ${id_bienestar}` })
         });
 
-        logger.info(`Actividad de bienestar con ID ${id_bienestar} eliminada por ${req.usuario.nombre_usuario}`);
+        logger.info(`Actividad de bienestar con ID ${id_bienestar} eliminada lógicamente por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Actividad de bienestar eliminada exitosamente' });
 
     } catch (error) {

@@ -80,6 +80,25 @@ const login = async (req, res) => {
       return res.status(401).json({ mensaje: 'Credenciales inválidas' });
     }
 
+    // Verificar si el usuario está activo
+    if (!usuario.activo) {
+      logger.warn(`Intento de login fallido: usuario inactivo - ${nombre_usuario}`);
+      await Auditoria.create({
+        accion: 'LOGIN_FAILED',
+        usuario: usuario.id_usuario,
+        descripcion: JSON.stringify({
+          mensaje: `Intento de login fallido: usuario inactivo`,
+          usuario: {
+            id: usuario.id_usuario,
+            nombre: usuario.nombre_usuario
+          }
+        }),
+        tabla_afectada: 'usuarios',
+        id_registro_afectado: usuario.id_usuario
+      });
+      return res.status(401).json({ mensaje: 'Usuario inactivo o credenciales inválidas' });
+    }
+
     const contrasenaValida = await bcrypt.compare(contrasena, usuario.contrasena_hash || '');
     
     if (!contrasenaValida) {
@@ -167,20 +186,10 @@ const registro = async (req, res) => {
     await Auditoria.create({
       accion: 'REGISTRO',
       usuario: req.usuario ? req.usuario.id : null,
-      descripcion: JSON.stringify({
-        mensaje: `Registro de nuevo usuario: ${nuevoUsuario.nombre_usuario}`,
-        nuevo_usuario: {
-          id: nuevoUsuario.id_usuario,
-          nombre_usuario: nuevoUsuario.nombre_usuario,
-          correo: nuevoUsuario.correo
-        },
-        realizado_por: req.usuario ? {
-          id: req.usuario.id,
-          nombre: req.usuario.nombre_usuario
-        } : null
-      }),
       tabla_afectada: 'usuarios',
-      id_registro_afectado: nuevoUsuario.id_usuario
+      id_registro: nuevoUsuario.id_usuario,
+      valor_nuevo: JSON.stringify(nuevoUsuario),
+      descripcion: `Registro de nuevo usuario: ${nuevoUsuario.nombre_usuario}`
     });
 
     logger.info(`Nuevo usuario registrado: ${nuevoUsuario.nombre_usuario}`);

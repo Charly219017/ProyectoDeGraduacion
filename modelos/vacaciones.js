@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     estado: {
       type: DataTypes.STRING(20),
-      allowNull: false,
+      allowNull: true,
       defaultValue: 'Pendiente',
       validate: {
         isIn: [['Pendiente', 'Aprobada', 'Rechazada', 'Cancelada']]
@@ -42,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
     fecha_creacion: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
-      allowNull: false
+      allowNull: true
     },
     actualizado_por: {
       type: DataTypes.INTEGER,
@@ -51,15 +51,16 @@ module.exports = (sequelize, DataTypes) => {
     fecha_actualizacion: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    activo: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+      allowNull: true
     }
   }, {
     tableName: 'vacaciones',
     timestamps: false,
-    indexes: [
-      { fields: ['id_empleado'] },
-      { fields: ['estado'] },
-      { fields: ['fecha_inicio', 'fecha_fin'] }
-    ]
+
   });
 
   // Las asociaciones se definen en una función 'associate' que se llamará desde index.js

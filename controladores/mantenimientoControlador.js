@@ -12,9 +12,8 @@ const Sequelize = require('sequelize');
 const obtenerTodosUsuarios = async (req, res) => {
   try {
     const usuarios = await Usuarios.findAll({
-      // Añadimos la condición para filtrar solo usuarios activos (corregido)
       where: {
-        estadousuario: true
+        activo: true
       },
       attributes: { exclude: ['contrasena_hash'] },
       include: [{ 
@@ -29,6 +28,7 @@ const obtenerTodosUsuarios = async (req, res) => {
       nombre_usuario: usuario.nombre_usuario,
       correo: usuario.correo,
       rol: usuario.roles ? usuario.roles.nombre_rol : 'Sin rol',
+      activo: usuario.activo
     }));
 
     res.json(usuariosConRoles);
@@ -97,8 +97,8 @@ const actualizarUsuario = async (req, res) => {
         errores: errors.array()
       });
     }
-    const { id_usuario} = req.params;
-    const { nombre_usuario, correo, contrasena, id_rol } = req.body;
+    const { id_usuario } = req.params;
+    const { nombre_usuario, correo, contrasena, id_rol, activo } = req.body;
     
     const usuarioAActualizar = await Usuarios.findByPk(id_usuario);
 
@@ -110,6 +110,7 @@ const actualizarUsuario = async (req, res) => {
       nombre_usuario,
       correo,
       id_rol,
+      activo,
       actualizado_por: req.usuario.id
     };
     
@@ -117,19 +118,24 @@ const actualizarUsuario = async (req, res) => {
       datosActualizados.contrasena_hash = await bcrypt.hash(contrasena, 10);
     }
     
+    const valorAnterior = { ...usuarioAActualizar.get({ plain: true }) };
+    delete valorAnterior.contrasena_hash;
+
     await usuarioAActualizar.update(datosActualizados);
+
+    // Preparamos los datos para la auditoría, excluyendo la contraseña.
+    const datosParaAuditoria = { ...req.body };
+    delete datosParaAuditoria.contrasena;
 
     //Se usa el campo 'descripcion' y se serializa el objeto JSON
     await Auditoria.create({
       accion: 'ACTUALIZAR_USUARIO',
-      usuario: req.usuario.id, 
-      descripcion: JSON.stringify({
-        mensaje: `Actualización de usuario: ${usuarioAActualizar.nombre_usuario}`,
-        usuario_actualizado: id_usuario,
-        nuevos_datos: req.body // Guardamos el body para ver qué se intentó cambiar
-      }),
+      usuario: req.usuario.id,
       tabla_afectada: 'usuarios',
-      id_registro_afectado: id_usuario
+      id_registro: id_usuario,
+      valor_anterior: JSON.stringify(valorAnterior),
+      valor_nuevo: JSON.stringify(datosParaAuditoria),
+      descripcion: JSON.stringify({ mensaje: `Actualización de usuario: ${usuarioAActualizar.nombre_usuario}` })
     });
 
     logger.info(`Usuario actualizado exitosamente: ${usuarioAActualizar.nombre_usuario} por ${req.usuario.nombre_usuario}`);
@@ -155,7 +161,7 @@ const eliminarUsuario = async (req, res) => {
 
     // Borrado lógico: cambiar el estado a false (inactivo)
     await usuarioAEliminar.update({
-      estadousuario: false,
+      activo: false,
       actualizado_por: req.usuario.id,
       fecha_actualizacion: new Date()
     });
@@ -163,12 +169,12 @@ const eliminarUsuario = async (req, res) => {
     await Auditoria.create({
       accion: 'ELIMINAR_USUARIO (LÓGICO)',
       usuario: req.usuario.id,
-      descripcion: JSON.stringify({
-        mensaje: `Desactivación de usuario: ${usuarioAEliminar.nombre_usuario}`,
-        usuario_eliminado_id: usuarioAEliminar.id_usuario
-      }),
       tabla_afectada: 'usuarios',
-      id_registro_afectado: usuarioAEliminar.id_usuario
+      id_registro: usuarioAEliminar.id_usuario,
+      campo_modificado: 'activo',
+      valor_anterior: 'true',
+      valor_nuevo: 'false',
+      descripcion: JSON.stringify({ mensaje: `Desactivación de usuario: ${usuarioAEliminar.nombre_usuario}` })
     });
 
     logger.info(`Usuario eliminado exitosamente: ${usuarioAEliminar.nombre_usuario} por ${req.usuario.nombre_usuario}`);

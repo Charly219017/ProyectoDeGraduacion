@@ -9,13 +9,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     id_evaluacion: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      unique: 'evaluacion_criterio_unica', // Restricción de unicidad compuesta
+      allowNull: true,
     },
     id_criterio: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      unique: 'evaluacion_criterio_unica', // Mismo nombre para la restricción
+      allowNull: true,
     },
     puntuacion: {
       type: DataTypes.DECIMAL(5, 2),
@@ -29,19 +27,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true
     },
-    fecha_creacion: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      allowNull: false
+    activo: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+      allowNull: true
     },
   }, {
     tableName: 'detalle_evaluacion',
-    timestamps: false,
-    indexes: [
-      { fields: ['id_evaluacion'] },
-      { fields: ['id_criterio'] },
-      { fields: ['creado_por'] }
-    ]
+    timestamps: true,
+    createdAt: 'fecha_creacion',
+    updatedAt: false,
   });
 
   // Las asociaciones se definen en una función 'associate' que se llamará desde index.js

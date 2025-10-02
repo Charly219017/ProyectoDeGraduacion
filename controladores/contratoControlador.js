@@ -18,15 +18,16 @@ const crearContrato = async (req, res) => {
 
         const nuevoContrato = await Contratos.create({
             ...req.body,
-            creado_por: req.usuario.id_usuario
+            creado_por: req.usuario.id
         });
 
         await Auditoria.create({
             tabla_afectada: 'contratos',
             id_registro: nuevoContrato.id_contrato,
             accion: 'CREAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Creación de nuevo contrato para el empleado con ID: ${nuevoContrato.id_empleado}`
+            usuario: req.usuario.id,
+            valor_nuevo: JSON.stringify(nuevoContrato),
+            descripcion: JSON.stringify({ mensaje: `Creación de nuevo contrato para el empleado con ID: ${nuevoContrato.id_empleado}` })
         });
 
         logger.info(`Contrato creado exitosamente con ID: ${nuevoContrato.id_contrato} por ${req.usuario.nombre_usuario}`);
@@ -47,6 +48,7 @@ const crearContrato = async (req, res) => {
 const obtenerTodosContratos = async (req, res) => {
     try {
         const contratos = await Contratos.findAll({
+            where: { activo: true },
             include: [
                 { model: Empleados, as: 'empleado' },
                 { model: Usuarios, as: 'creador' },
@@ -78,7 +80,7 @@ const obtenerContratoPorId = async (req, res) => {
             ]
         });
 
-        if (!contrato) {
+        if (!contrato || !contrato.activo) {
             return res.status(404).json({ mensaje: 'Contrato no encontrado' });
         }
 
@@ -111,9 +113,11 @@ const actualizarContrato = async (req, res) => {
             return res.status(404).json({ mensaje: 'Contrato no encontrado' });
         }
 
+        const valorAnterior = { ...contratoAActualizar.get({ plain: true }) };
+
         await contratoAActualizar.update({
             ...req.body,
-            actualizado_por: req.usuario.id_usuario,
+            actualizado_por: req.usuario.id,
             fecha_actualizacion: new Date()
         });
 
@@ -121,8 +125,10 @@ const actualizarContrato = async (req, res) => {
             tabla_afectada: 'contratos',
             id_registro: contratoAActualizar.id_contrato,
             accion: 'ACTUALIZAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Actualización de contrato con ID: ${contratoAActualizar.id_contrato}`
+            usuario: req.usuario.id,
+            valor_anterior: JSON.stringify(valorAnterior),
+            valor_nuevo: JSON.stringify(req.body),
+            descripcion: JSON.stringify({ mensaje: `Actualización de contrato con ID: ${contratoAActualizar.id_contrato}` })
         });
 
         logger.info(`Contrato con ID ${id_contrato} actualizado por ${req.usuario.nombre_usuario}`);
@@ -145,21 +151,23 @@ const eliminarContrato = async (req, res) => {
         const { id_contrato } = req.params;
         const contratoAEliminar = await Contratos.findByPk(id_contrato);
 
-        if (!contratoAEliminar) {
+        if (!contratoAEliminar || !contratoAEliminar.activo) {
             return res.status(404).json({ mensaje: 'Contrato no encontrado' });
         }
 
-        await contratoAEliminar.destroy();
+        // Borrado lógico
+        await contratoAEliminar.update({ activo: false });
 
         await Auditoria.create({
             tabla_afectada: 'contratos',
             id_registro: id_contrato,
             accion: 'ELIMINAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Eliminación de contrato con ID: ${id_contrato}`
+            usuario: req.usuario.id,
+            valor_anterior: JSON.stringify(contratoAEliminar),
+            descripcion: JSON.stringify({ mensaje: `Eliminación lógica de contrato con ID: ${id_contrato}` })
         });
 
-        logger.info(`Contrato con ID ${id_contrato} eliminado por ${req.usuario.nombre_usuario}`);
+        logger.info(`Contrato con ID ${id_contrato} eliminado lógicamente por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Contrato eliminado exitosamente' });
 
     } catch (error) {

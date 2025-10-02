@@ -43,6 +43,10 @@ module.exports = (sequelize, DataTypes) => {
     actualizado_por: {
       type: DataTypes.INTEGER,
       allowNull: true
+    }, 
+    activo: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
     }
   }, {
     tableName: 'usuarios', // Nombre de la tabla de la base de datos
@@ -51,7 +55,6 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: 'fecha_actualizacion',
   });
 
-  // Aquí definimos las relaciones de la tabla Usuarios
   Usuarios.associate = (models) => {
     // Un usuario pertenece a un rol
     Usuarios.belongsTo(models.Roles, { 
@@ -61,13 +64,13 @@ module.exports = (sequelize, DataTypes) => {
 
     // Un usuario fue creado por otro usuario
     Usuarios.belongsTo(models.Usuarios, { 
-      foreignKey: 'creado_por', 
+      foreignKey: 'creado_por',
       as: 'creador' 
     });
 
     // Un usuario fue actualizado por otro usuario
     Usuarios.belongsTo(models.Usuarios, { 
-      foreignKey: 'actualizado_por', 
+      foreignKey: 'actualizado_por',
       as: 'actualizador' 
     });
   };

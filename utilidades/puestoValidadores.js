@@ -6,14 +6,14 @@ const { body } = require('express-validator');
  */
 const validarCreacionPuesto = [
     body('nombre_puesto')
-        .isLength({ min: 2, max: 100 }).withMessage('El nombre del puesto debe tener entre 2 y 100 caracteres'),
-    body('salario')
-        .isFloat({ gt: 0 }).withMessage('El salario debe ser un número positivo'),
-    body('descripcion')
-        .optional({ nullable: true, checkFalsy: true })
-        .isString().withMessage('La descripción debe ser una cadena de texto'),
-    body('id_departamento')
-        .isInt({ gt: 0 }).withMessage('El ID del departamento debe ser un número entero positivo')
+        .isLength({ min: 2, max: 100 }).withMessage('El nombre del puesto debe tener entre 2 y 100 caracteres')
+        .notEmpty().withMessage('El nombre del puesto es requerido'),
+    body('salario_base')
+        .isFloat({ gt: 0 }).withMessage('El salario base debe ser un número positivo')
+        .notEmpty().withMessage('El salario base es requerido'),
+    body('id_carrera')
+        .optional()
+        .isInt({ gt: 0 }).withMessage('El ID de la carrera debe ser un número entero positivo')
 ];
 
 /**
@@ -23,15 +23,12 @@ const validarActualizacionPuesto = [
     body('nombre_puesto')
         .optional()
         .isLength({ min: 2, max: 100 }).withMessage('El nombre del puesto debe tener entre 2 y 100 caracteres'),
-    body('salario')
+    body('salario_base')
         .optional()
-        .isFloat({ gt: 0 }).withMessage('El salario debe ser un número positivo'),
-    body('descripcion')
-        .optional({ nullable: true, checkFalsy: true })
-        .isString().withMessage('La descripción debe ser una cadena de texto'),
-    body('id_departamento')
+        .isFloat({ gt: 0 }).withMessage('El salario base debe ser un número positivo'),
+    body('id_carrera')
         .optional()
-        .isInt({ gt: 0 }).withMessage('El ID del departamento debe ser un número entero positivo')
+        .isInt({ gt: 0 }).withMessage('El ID de la carrera debe ser un número entero positivo')
 ];
 
 module.exports = {

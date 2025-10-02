@@ -18,15 +18,15 @@ const crearVacacion = async (req, res) => {
 
         const nuevaVacacion = await Vacaciones.create({
             ...req.body,
-            creado_por: req.usuario.id_usuario
+            creado_por: req.usuario.id
         });
 
         await Auditoria.create({
             tabla_afectada: 'vacaciones',
             id_registro: nuevaVacacion.id_vacacion,
             accion: 'CREAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Creación de solicitud de vacaciones para el empleado ID ${nuevaVacacion.id_empleado}`
+            usuario: req.usuario.id,
+            descripcion: JSON.stringify({ mensaje: `Creación de solicitud de vacaciones para el empleado ID ${nuevaVacacion.id_empleado}` })
         });
 
         logger.info(`Solicitud de vacaciones creada exitosamente con ID: ${nuevaVacacion.id_vacacion} por ${req.usuario.nombre_usuario}`);
@@ -47,6 +47,7 @@ const crearVacacion = async (req, res) => {
 const obtenerTodasVacaciones = async (req, res) => {
     try {
         const vacaciones = await Vacaciones.findAll({
+            where: { activo: true },
             include: [
                 { model: Empleados, as: 'empleado' },
                 { model: Usuarios, as: 'creador' },
@@ -78,7 +79,7 @@ const obtenerVacacionPorId = async (req, res) => {
             ]
         });
 
-        if (!vacacion) {
+        if (!vacacion || !vacacion.activo) {
             return res.status(404).json({ mensaje: 'Solicitud de vacaciones no encontrada' });
         }
 
@@ -107,13 +108,13 @@ const actualizarVacacion = async (req, res) => {
         const { id_vacacion } = req.params;
         const vacacionAActualizar = await Vacaciones.findByPk(id_vacacion);
 
-        if (!vacacionAActualizar) {
+        if (!vacacionAActualizar || !vacacionAActualizar.activo) {
             return res.status(404).json({ mensaje: 'Solicitud de vacaciones no encontrada' });
         }
 
         await vacacionAActualizar.update({
             ...req.body,
-            actualizado_por: req.usuario.id_usuario,
+            actualizado_por: req.usuario.id,
             fecha_actualizacion: new Date()
         });
 
@@ -121,8 +122,8 @@ const actualizarVacacion = async (req, res) => {
             tabla_afectada: 'vacaciones',
             id_registro: vacacionAActualizar.id_vacacion,
             accion: 'ACTUALIZAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Actualización de solicitud de vacaciones con ID: ${vacacionAActualizar.id_vacacion}`
+            usuario: req.usuario.id,
+            descripcion: JSON.stringify({ mensaje: `Actualización de solicitud de vacaciones con ID: ${vacacionAActualizar.id_vacacion}` })
         });
 
         logger.info(`Vacación con ID ${id_vacacion} actualizada por ${req.usuario.nombre_usuario}`);
@@ -143,23 +144,31 @@ const actualizarVacacion = async (req, res) => {
 const eliminarVacacion = async (req, res) => {
     try {
         const { id_vacacion } = req.params;
-        const vacacionAEliminar = await Vacaciones.findByPk(id_vacacion);
+        const vacacionAEliminar = await Vacaciones.findOne({ 
+            where: { id_vacacion, activo: true } 
+        });
 
         if (!vacacionAEliminar) {
             return res.status(404).json({ mensaje: 'Solicitud de vacaciones no encontrada' });
         }
 
-        await vacacionAEliminar.destroy();
+        // Borrado lógico
+        await vacacionAEliminar.update({ 
+            activo: false,
+            actualizado_por: req.usuario.id,
+            fecha_actualizacion: new Date()
+        });
 
         await Auditoria.create({
             tabla_afectada: 'vacaciones',
             id_registro: id_vacacion,
-            accion: 'ELIMINAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Eliminación de solicitud de vacaciones con ID: ${id_vacacion}`
+            accion: 'ELIMINAR LÓGICAMENTE',
+            usuario: req.usuario.id,
+            valor_anterior: JSON.stringify(vacacionAEliminar),
+            descripcion: JSON.stringify({ mensaje: `Eliminación lógica de solicitud de vacaciones con ID: ${id_vacacion}` })
         });
 
-        logger.info(`Vacación con ID ${id_vacacion} eliminada por ${req.usuario.nombre_usuario}`);
+        logger.info(`Solicitud de vacaciones con ID ${id_vacacion} eliminada lógicamente por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Solicitud de vacaciones eliminada exitosamente' });
 
     } catch (error) {

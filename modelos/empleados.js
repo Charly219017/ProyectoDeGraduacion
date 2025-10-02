@@ -10,33 +10,20 @@ module.exports = (sequelize, DataTypes) => {
     },
     nombre_completo: {
       type: DataTypes.STRING(100),
-      allowNull: false,
-      validate: {
-        notEmpty: true,
-        len: [2, 100]
-      }
+      allowNull: false
     },
     dpi: {
-      type: DataTypes.STRING(25),
+      type: DataTypes.STRING(13),
       unique: true,
-      allowNull: true,
-      validate: {
-        len: [0, 25]
-      }
+      allowNull: true
     },
     telefono: {
-      type: DataTypes.STRING(20),
-      allowNull: true,
-      validate: {
-        len: [0, 20]
-      }
+      type: DataTypes.STRING(8),
+      allowNull: true
     },
     correo_personal: {
       type: DataTypes.STRING(100),
-      allowNull: true,
-      validate: {
-        isEmail: true
-      }
+      allowNull: true
     },
     direccion: {
       type: DataTypes.TEXT,
@@ -48,52 +35,45 @@ module.exports = (sequelize, DataTypes) => {
     },
     genero: {
       type: DataTypes.STRING(15),
-      allowNull: true,
-      validate: {
-        isIn: [['Masculino', 'Femenino', 'Otro']]
-      }
+      allowNull: true
     },
     estado_civil: {
       type: DataTypes.STRING(20),
-      allowNull: true,
-      validate: {
-        isIn: [['Soltero', 'Casado', 'Divorciado', 'Viudo']]
-      }
+      allowNull: true
     },
     fecha_ingreso: {
       type: DataTypes.DATEONLY,
-      allowNull: false,
-      validate: {
-        notEmpty: true
-      }
+      allowNull: true
     },
     id_puesto: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    estadoEmpleado: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: true,
-      field: 'estadoempleado' // Mapea a la columna correcta 'estadoempleado'
+    estado_empleo: {
+      type: DataTypes.STRING(20),
+      defaultValue: 'Activo'
     },
     creado_por: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    actualizado_por: {
       type: DataTypes.INTEGER,
       allowNull: true
     },
     fecha_creacion: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
-      allowNull: false
-    },
-    actualizado_por: {
-      type: DataTypes.INTEGER,
       allowNull: true
     },
     fecha_actualizacion: {
       type: DataTypes.DATE,
       allowNull: true
     },
+    activo: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
+    }
   }, {
     tableName: 'empleados',
     timestamps: true,
@@ -101,21 +81,17 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: 'fecha_actualizacion'
   });
 
-  // Las asociaciones se definen en una función 'associate' que se llamará desde index.js
   Empleados.associate = (models) => {
-    // Un empleado pertenece a un puesto
     Empleados.belongsTo(models.Puestos, {
       foreignKey: 'id_puesto',
       as: 'puesto'
     });
 
-    // Un empleado pertenece a un usuario que lo creó
     Empleados.belongsTo(models.Usuarios, {
       foreignKey: 'creado_por',
       as: 'creador'
     });
 
-    // Un empleado pertenece a un usuario que lo actualizó
     Empleados.belongsTo(models.Usuarios, {
       foreignKey: 'actualizado_por',
       as: 'actualizador'

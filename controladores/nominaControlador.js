@@ -18,15 +18,15 @@ const crearNomina = async (req, res) => {
 
         const nuevaNomina = await Nomina.create({
             ...req.body,
-            creado_por: req.usuario.id_usuario
+            creado_por: req.usuario.id
         });
 
         await Auditoria.create({
             tabla_afectada: 'nomina',
             id_registro: nuevaNomina.id_nomina,
             accion: 'CREAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Creación de nómina para el empleado ID ${nuevaNomina.id_empleado} para el mes ${nuevaNomina.mes}/${nuevaNomina.anio}`
+            usuario: req.usuario.id,
+            descripcion: JSON.stringify({ mensaje: `Creación de nómina para el empleado ID ${nuevaNomina.id_empleado} para el mes ${nuevaNomina.mes}/${nuevaNomina.anio}` })
         });
 
         logger.info(`Nómina creada exitosamente con ID: ${nuevaNomina.id_nomina} por ${req.usuario.nombre_usuario}`);
@@ -47,6 +47,7 @@ const crearNomina = async (req, res) => {
 const obtenerTodasNominas = async (req, res) => {
     try {
         const nominas = await Nomina.findAll({
+            where: { activo: true },
             include: [
                 { model: Empleados, as: 'empleado' },
                 { model: Usuarios, as: 'creador' },
@@ -78,7 +79,7 @@ const obtenerNominaPorId = async (req, res) => {
             ]
         });
 
-        if (!nomina) {
+        if (!nomina || !nomina.activo) {
             return res.status(404).json({ mensaje: 'Registro de nómina no encontrado' });
         }
 
@@ -105,7 +106,9 @@ const actualizarNomina = async (req, res) => {
         }
         
         const { id_nomina } = req.params;
-        const nominaAActualizar = await Nomina.findByPk(id_nomina);
+        const nominaAActualizar = await Nomina.findOne({
+            where: { id_nomina, activo: true }
+        });
 
         if (!nominaAActualizar) {
             return res.status(404).json({ mensaje: 'Registro de nómina no encontrado' });
@@ -113,7 +116,7 @@ const actualizarNomina = async (req, res) => {
 
         await nominaAActualizar.update({
             ...req.body,
-            actualizado_por: req.usuario.id_usuario,
+            actualizado_por: req.usuario.id,
             fecha_actualizacion: new Date()
         });
 
@@ -121,8 +124,8 @@ const actualizarNomina = async (req, res) => {
             tabla_afectada: 'nomina',
             id_registro: nominaAActualizar.id_nomina,
             accion: 'ACTUALIZAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Actualización de nómina con ID: ${nominaAActualizar.id_nomina}`
+            usuario: req.usuario.id,
+            descripcion: JSON.stringify({ mensaje: `Actualización de nómina con ID: ${nominaAActualizar.id_nomina}` })
         });
 
         logger.info(`Nómina con ID ${id_nomina} actualizada por ${req.usuario.nombre_usuario}`);
@@ -138,28 +141,34 @@ const actualizarNomina = async (req, res) => {
 };
 
 /**
- * Controlador para eliminar un registro de nómina por su ID.
+ * Controlador para eliminar lógicamente un registro de nómina por su ID.
  */
 const eliminarNomina = async (req, res) => {
     try {
         const { id_nomina } = req.params;
-        const nominaAEliminar = await Nomina.findByPk(id_nomina);
+        const nominaAEliminar = await Nomina.findOne({
+            where: { id_nomina, activo: true }
+        });
 
         if (!nominaAEliminar) {
             return res.status(404).json({ mensaje: 'Registro de nómina no encontrado' });
         }
 
-        await nominaAEliminar.destroy();
+        await nominaAEliminar.update({ 
+            activo: false,
+            actualizado_por: req.usuario.id,
+            fecha_actualizacion: new Date()
+        });
 
         await Auditoria.create({
             tabla_afectada: 'nomina',
             id_registro: id_nomina,
-            accion: 'ELIMINAR',
-            usuario: req.usuario.id_usuario,
-            descripcion: `Eliminación de nómina con ID: ${id_nomina}`
+            accion: 'ELIMINAR LÓGICAMENTE',
+            usuario: req.usuario.id,
+            descripcion: JSON.stringify({ mensaje: `Eliminación lógica de nómina con ID: ${id_nomina}` })
         });
 
-        logger.info(`Nómina con ID ${id_nomina} eliminada por ${req.usuario.nombre_usuario}`);
+        logger.info(`Nómina con ID ${id_nomina} eliminada lógicamente por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Registro de nómina eliminado exitosamente' });
 
     } catch (error) {
