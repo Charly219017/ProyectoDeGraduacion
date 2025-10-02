@@ -1,9 +1,10 @@
 // backend/controladores/mantenimientoControlador.js
-const { validationResult } = require('express-validator');
-const bcrypt = require('bcryptjs');
-const { Usuarios, Roles, Auditoria } = require('../modelos');
+const { exec } = require('child_process');
+require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
+const config = require('../configuracion/configuracion.js');
 const logger = require('../utilidades/logger');
-const Sequelize = require('sequelize');
 
 /**
  * Controlador para obtener una lista completa de todos los usuarios

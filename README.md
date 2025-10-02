@@ -105,17 +105,108 @@ backend/
 
 ## API Endpoints
 
-### Autenticación
-- `POST /api/auth/login` - Iniciar sesión
-- `POST /api/auth/registro` - Registrar usuario (solo administradores)
-- `GET /api/auth/perfil` - Obtener perfil del usuario
+Esta es una guía detallada de los endpoints del API, agrupados por módulo. Todas las rutas comienzan con el prefijo `/api`.
 
-### Dashboard
-- `GET /api/dashboard/estadisticas` - Obtener estadísticas
-- `GET /api/dashboard/resumen` - Obtener resumen del sistema
+#### Auth (`/api/auth`)
+*   `POST /login` - Para iniciar sesión.
 
-### Salud del Sistema
-- `GET /api/health` - Verificar estado del servidor
+#### Empleados (`/api/empleados`)
+*   `GET /` - Obtiene la lista de todos los empleados.
+*   `GET /:id` - Obtiene un empleado específico por su ID.
+*   `POST /` - Crea un nuevo empleado.
+*   `PUT /:id` - Actualiza un empleado existente.
+*   `DELETE /:id` - Elimina un empleado.
+
+#### Puestos (`/api/puestos`)
+*   `GET /` - Obtiene todos los puestos.
+*   `GET /:id` - Obtiene un puesto por ID.
+*   `POST /` - Crea un nuevo puesto.
+*   `PUT /:id` - Actualiza un puesto.
+*   `DELETE /:id` - Elimina un puesto.
+
+#### Dependencias (`/api/dependencias`)
+*   `GET /` - Obtiene todas las relaciones de dependencia.
+*   `GET /:id` - Obtiene una dependencia por ID.
+*   `POST /` - Crea una nueva relación de dependencia.
+*   `PUT /:id` - Actualiza una relación de dependencia.
+*   `DELETE /:id` - Elimina una relación de dependencia.
+
+#### Vacantes (`/api/vacantes`)
+*   `GET /` - Obtiene todas las vacantes.
+*   `GET /:id` - Obtiene una vacante por ID.
+*   `POST /` - Crea una nueva vacante.
+*   `PUT /:id` - Actualiza una vacante.
+*   `DELETE /:id` - Elimina una vacante.
+
+#### Candidatos (`/api/candidatos`)
+*   `GET /` - Obtiene todos los candidatos.
+*   `GET /:id` - Obtiene un candidato por ID.
+*   `POST /` - Crea un nuevo candidato.
+*   `PUT /:id` - Actualiza un candidato.
+*   `DELETE /:id` - Elimina un candidato.
+
+#### Aplicaciones a Vacantes (`/api/aplicaciones`)
+*   `GET /` - Obtiene todas las aplicaciones.
+*   `GET /:id` - Obtiene una aplicación por ID.
+*   `POST /` - Crea una nueva aplicación.
+*   `PUT /:id` - Actualiza el estado de una aplicación.
+
+#### Contratos (`/api/contratos`)
+*   `GET /` - Obtiene todos los contratos.
+*   `GET /:id` - Obtiene un contrato por ID.
+*   `POST /` - Crea un nuevo contrato.
+*   `PUT /:id` - Actualiza un contrato.
+*   `DELETE /:id` - Elimina un contrato.
+
+#### Nómina (`/api/nomina`)
+*   `GET /` - Obtiene todos los registros de nómina.
+*   `GET /:id` - Obtiene un registro de nómina por ID.
+*   `POST /` - Crea un nuevo registro de nómina.
+*   `PUT /:id` - Actualiza un registro de nómina.
+*   `DELETE /:id` - Elimina un registro de nómina.
+
+#### Vacaciones (`/api/vacaciones`)
+*   `GET /` - Obtiene todas las solicitudes de vacaciones.
+*   `GET /:id` - Obtiene una solicitud por ID.
+*   `POST /` - Crea una nueva solicitud de vacaciones.
+*   `PUT /:id` - Actualiza una solicitud.
+*   `DELETE /:id` - Elimina una solicitud.
+
+#### Bienestar (Programas) (`/api/bienestar`)
+*   `GET /` - Obtiene todos los programas de bienestar.
+*   `GET /:id` - Obtiene un programa por ID.
+*   `POST /` - Crea un nuevo programa.
+*   `PUT /:id` - Actualiza un programa.
+*   `DELETE /:id` - Elimina un programa.
+
+#### Evaluaciones de Desempeño (`/api/evaluaciones`)
+*   `GET /` - Obtiene todas las evaluaciones.
+*   `GET /:id` - Obtiene una evaluación por ID.
+*   `POST /` - Crea una nueva evaluación.
+
+#### Detalles de Evaluación (`/api/detalles-evaluacion`)
+*   `GET /evaluacion/:id_evaluacion` - Obtiene los detalles de una evaluación específica.
+*   `POST /` - Añade un detalle a una evaluación.
+
+#### Criterios de Evaluación (`/api/criterios`)
+*   `GET /` - Obtiene todos los criterios.
+*   `POST /` - Crea un nuevo criterio.
+*   `PUT /:id` - Actualiza un criterio.
+*   `DELETE /:id` - Elimina un criterio.
+
+#### Carreras (`/api/carreras`)
+*   `GET /` - Obtiene todas las carreras.
+*   `POST /` - Crea una nueva carrera.
+*   `PUT /:id` - Actualiza una carrera.
+*   `DELETE /:id` - Elimina una carrera.
+
+#### Dashboard (`/api/dashboard`)
+*   `GET /counts` - Obtiene contadores generales (empleados, vacantes, etc.).
+
+#### Mantenimiento (`/api/mantenimiento`)
+*   `POST /backup` - Realiza un backup de la base de datos.
+*   `GET /restore` - Obtiene la lista de backups disponibles.
+*   `POST /restore` - Restaura la base de datos desde un backup específico.
 
 ## Seguridad
 
