@@ -11,10 +11,10 @@ router.use(autenticarToken);
 router.use(soloAdministradores);
 
 // Rutas para Contratos
-router.get('/', contratoControlador.obtenerTodosContratos);
-router.post('/', validarCreacionContrato, contratoControlador.crearContrato);
-router.get('/:id_contrato', contratoControlador.obtenerContratoPorId);
-router.put('/:id_contrato', validarActualizacionContrato, contratoControlador.actualizarContrato);
-router.delete('/:id_contrato', contratoControlador.eliminarContrato);
+router.get('/obtener-todos', contratoControlador.obtenerTodosContratos);
+router.post('/crear', validarCreacionContrato, contratoControlador.crearContrato);
+router.get('/obtener/:id_contrato', contratoControlador.obtenerContratoPorId);
+router.put('/actualizar/:id_contrato', validarActualizacionContrato, contratoControlador.actualizarContrato);
+router.delete('/eliminar/:id_contrato', contratoControlador.eliminarContrato);
 
 module.exports = router;

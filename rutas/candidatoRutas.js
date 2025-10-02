@@ -11,10 +11,10 @@ router.use(autenticarToken);
 router.use(soloAdministradores);
 
 // Rutas para Candidatos
-router.get('/', candidatoControlador.obtenerTodosCandidatos);
-router.post('/', validarCreacionCandidato, candidatoControlador.crearCandidato);
-router.get('/:id_candidato', candidatoControlador.obtenerCandidatoPorId);
-router.put('/:id_candidato', validarActualizacionCandidato, candidatoControlador.actualizarCandidato);
-router.delete('/:id_candidato', candidatoControlador.eliminarCandidato);
+router.get('/obtenercandidatos', candidatoControlador.obtenerTodosCandidatos);
+router.post('/crearcandidato', validarCreacionCandidato, candidatoControlador.crearCandidato);
+router.get('/obtener/:id_candidato', candidatoControlador.obtenerCandidatoPorId);
+router.put('/actualizar/:id_candidato', validarActualizacionCandidato, candidatoControlador.actualizarCandidato);
+router.delete('/eliminar/:id_candidato', candidatoControlador.eliminarCandidato);
 
 module.exports = router;

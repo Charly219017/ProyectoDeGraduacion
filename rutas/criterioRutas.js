@@ -11,8 +11,8 @@ router.use(autenticarToken);
 router.use(soloAdministradores);
 
 // Rutas para Criterios
-router.get('/', criterioControlador.obtenerTodosCriterios);
-router.post('/', validarCreacionCriterio, criterioControlador.crearCriterio);
+router.get('/obtenercriterios', criterioControlador.obtenerTodosCriterios);
+router.post('/crearcriterio', validarCreacionCriterio, criterioControlador.crearCriterio);
 router.get('/:id_criterio', criterioControlador.obtenerCriterioPorId);
 router.put('/:id_criterio', validarActualizacionCriterio, criterioControlador.actualizarCriterio);
 router.delete('/:id_criterio', criterioControlador.eliminarCriterio);

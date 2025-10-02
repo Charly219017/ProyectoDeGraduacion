@@ -11,10 +11,10 @@ router.use(autenticarToken);
 router.use(soloAdministradores);
 
 // Rutas para Aplicaciones
-router.get('/', aplicacionControlador.obtenerTodasAplicaciones);
-router.post('/', validarCreacionAplicacion, aplicacionControlador.crearAplicacion);
-router.get('/:id_aplicacion', aplicacionControlador.obtenerAplicacionPorId);
-router.put('/:id_aplicacion', validarActualizacionAplicacion, aplicacionControlador.actualizarAplicacion);
-router.delete('/:id_aplicacion', aplicacionControlador.eliminarAplicacion);
+router.get('/obtener-aplicaciones', aplicacionControlador.obtenerTodasAplicaciones);
+router.post('/crearaplicacion', validarCreacionAplicacion, aplicacionControlador.crearAplicacion);
+router.get('/obtener/:id_aplicacion', aplicacionControlador.obtenerAplicacionPorId);
+router.put('/actualizar/:id_aplicacion', validarActualizacionAplicacion, aplicacionControlador.actualizarAplicacion);
+router.delete('/eliminar/:id_aplicacion', aplicacionControlador.eliminarAplicacion);
 
 module.exports = router;

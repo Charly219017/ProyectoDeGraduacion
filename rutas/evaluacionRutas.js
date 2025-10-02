@@ -11,8 +11,8 @@ router.use(autenticarToken);
 router.use(soloAdministradores);
 
 // Rutas para Evaluaciones
-router.get('/', evaluacionControlador.obtenerTodasEvaluaciones);
-router.post('/', validarCreacionEvaluacion, evaluacionControlador.crearEvaluacion);
+router.get('/obtenerevaluaciones', evaluacionControlador.obtenerTodasEvaluaciones);
+router.post('/crearevaluacion', validarCreacionEvaluacion, evaluacionControlador.crearEvaluacion);
 router.get('/:id_evaluacion', evaluacionControlador.obtenerEvaluacionPorId);
 router.put('/:id_evaluacion', validarActualizacionEvaluacion, evaluacionControlador.actualizarEvaluacion);
 router.delete('/:id_evaluacion', evaluacionControlador.eliminarEvaluacion);

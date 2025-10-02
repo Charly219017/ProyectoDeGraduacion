@@ -11,8 +11,8 @@ router.use(autenticarToken);
 router.use(soloAdministradores);
 
 // Rutas para Vacaciones
-router.get('/', vacacionControlador.obtenerTodasVacaciones);
-router.post('/', validarCreacionVacacion, vacacionControlador.crearVacacion);
+router.get('/obtenervacaciones', vacacionControlador.obtenerTodasVacaciones);
+router.post('/crearvacacion', validarCreacionVacacion, vacacionControlador.crearVacacion);
 router.get('/:id_vacacion', vacacionControlador.obtenerVacacionPorId);
 router.put('/:id_vacacion', validarActualizacionVacacion, vacacionControlador.actualizarVacacion);
 router.delete('/:id_vacacion', vacacionControlador.eliminarVacacion);

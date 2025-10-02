@@ -11,10 +11,10 @@ router.use(autenticarToken);
 router.use(soloAdministradores);
 
 // Rutas para Bienestar
-router.get('/', bienestarControlador.obtenerTodasActividadesBienestar);
-router.post('/', validarCreacionActividadBienestar, bienestarControlador.crearActividadBienestar);
-router.get('/:id_bienestar', bienestarControlador.obtenerActividadBienestarPorId);
-router.put('/:id_bienestar', validarActualizacionActividadBienestar, bienestarControlador.actualizarActividadBienestar);
-router.delete('/:id_bienestar', bienestarControlador.eliminarActividadBienestar);
+router.get('/obtenertodo-bienestar', bienestarControlador.obtenerTodasActividadesBienestar);
+router.post('/crearbienestar', validarCreacionActividadBienestar, bienestarControlador.crearActividadBienestar);
+router.get('/obtener/:id_bienestar', bienestarControlador.obtenerActividadBienestarPorId);
+router.put('/actualizar/:id_bienestar', validarActualizacionActividadBienestar, bienestarControlador.actualizarActividadBienestar);
+router.delete('/eliminar/:id_bienestar', bienestarControlador.eliminarActividadBienestar);
 
 module.exports = router;

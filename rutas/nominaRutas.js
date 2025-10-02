@@ -11,8 +11,8 @@ router.use(autenticarToken);
 router.use(soloAdministradores);
 
 // Rutas para Nómina
-router.get('/', nominaControlador.obtenerTodasNominas);
-router.post('/', validarCreacionNomina, nominaControlador.crearNomina);
+router.get('/obtenernominas', nominaControlador.obtenerTodasNominas);
+router.post('/crearnomina', validarCreacionNomina, nominaControlador.crearNomina);
 router.get('/:id_nomina', nominaControlador.obtenerNominaPorId);
 router.put('/:id_nomina', validarActualizacionNomina, nominaControlador.actualizarNomina);
 router.delete('/:id_nomina', nominaControlador.eliminarNomina);

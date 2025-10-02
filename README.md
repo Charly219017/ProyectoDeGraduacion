@@ -109,104 +109,117 @@ Esta es una guía detallada de los endpoints del API, agrupados por módulo. Tod
 
 #### Auth (`/api/auth`)
 *   `POST /login` - Para iniciar sesión.
+*   `POST /registro` - Registra un nuevo usuario (requiere rol de Administrador).
+*   `GET /perfil` - Obtiene el perfil del usuario autenticado.
 
 #### Empleados (`/api/empleados`)
-*   `GET /` - Obtiene la lista de todos los empleados.
-*   `GET /:id` - Obtiene un empleado específico por su ID.
-*   `POST /` - Crea un nuevo empleado.
-*   `PUT /:id` - Actualiza un empleado existente.
-*   `DELETE /:id` - Elimina un empleado.
+*   `GET /obtenerempleados` - Obtiene la lista de todos los empleados.
+*   `POST /crearempleado` - Crea un nuevo empleado.
+*   `GET /obtener/:id_empleado` - Obtiene un empleado específico por su ID.
+*   `PUT /actualizar/:id_empleado` - Actualiza un empleado existente.
+*   `DELETE /eliminar/:id_empleado` - Elimina un empleado.
 
 #### Puestos (`/api/puestos`)
-*   `GET /` - Obtiene todos los puestos.
-*   `GET /:id` - Obtiene un puesto por ID.
-*   `POST /` - Crea un nuevo puesto.
-*   `PUT /:id` - Actualiza un puesto.
-*   `DELETE /:id` - Elimina un puesto.
+*   `GET /obtenerpuestos` - Obtiene todos los puestos.
+*   `POST /crearpuesto` - Crea un nuevo puesto.
+*   `GET /:id_puesto` - Obtiene un puesto por ID.
+*   `PUT /:id_puesto` - Actualiza un puesto.
+*   `DELETE /:id_puesto` - Elimina un puesto.
 
 #### Dependencias (`/api/dependencias`)
-*   `GET /` - Obtiene todas las relaciones de dependencia.
-*   `GET /:id` - Obtiene una dependencia por ID.
-*   `POST /` - Crea una nueva relación de dependencia.
-*   `PUT /:id` - Actualiza una relación de dependencia.
-*   `DELETE /:id` - Elimina una relación de dependencia.
+*   `GET /obtenerdependencias` - Obtiene todas las relaciones de dependencia.
+*   `POST /creardependencia` - Crea una nueva relación de dependencia.
+*   `GET /:id_dependencia` - Obtiene una dependencia por ID.
+*   `PUT /:id_dependencia` - Actualiza una relación de dependencia.
+*   `DELETE /:id_dependencia` - Elimina una relación de dependencia.
 
 #### Vacantes (`/api/vacantes`)
-*   `GET /` - Obtiene todas las vacantes.
-*   `GET /:id` - Obtiene una vacante por ID.
-*   `POST /` - Crea una nueva vacante.
-*   `PUT /:id` - Actualiza una vacante.
-*   `DELETE /:id` - Elimina una vacante.
+*   `GET /obtenervacantes` - Obtiene todas las vacantes.
+*   `POST /crearvacantes` - Crea una nueva vacante.
+*   `GET /:id_vacante` - Obtiene una vacante por ID.
+*   `PUT /:id_vacante` - Actualiza una vacante.
+*   `DELETE /:id_vacante` - Elimina una vacante.
 
 #### Candidatos (`/api/candidatos`)
-*   `GET /` - Obtiene todos los candidatos.
-*   `GET /:id` - Obtiene un candidato por ID.
-*   `POST /` - Crea un nuevo candidato.
-*   `PUT /:id` - Actualiza un candidato.
-*   `DELETE /:id` - Elimina un candidato.
+*   `GET /obtenercandidatos` - Obtiene todos los candidatos.
+*   `POST /crearcandidato` - Crea un nuevo candidato.
+*   `GET /obtener/:id_candidato` - Obtiene un candidato por ID.
+*   `PUT /actualizar/:id_candidato` - Actualiza un candidato.
+*   `DELETE /eliminar/:id_candidato` - Elimina un candidato.
 
 #### Aplicaciones a Vacantes (`/api/aplicaciones`)
-*   `GET /` - Obtiene todas las aplicaciones.
-*   `GET /:id` - Obtiene una aplicación por ID.
-*   `POST /` - Crea una nueva aplicación.
-*   `PUT /:id` - Actualiza el estado de una aplicación.
+*   `GET /obtener-aplicaciones` - Obtiene todas las aplicaciones.
+*   `POST /crearaplicacion` - Crea una nueva aplicación.
+*   `GET /obtener/:id_aplicacion` - Obtiene una aplicación por ID.
+*   `PUT /actualizar/:id_aplicacion` - Actualiza el estado de una aplicación.
+*   `DELETE /eliminar/:id_aplicacion` - Elimina una aplicación.
 
 #### Contratos (`/api/contratos`)
-*   `GET /` - Obtiene todos los contratos.
-*   `GET /:id` - Obtiene un contrato por ID.
-*   `POST /` - Crea un nuevo contrato.
-*   `PUT /:id` - Actualiza un contrato.
-*   `DELETE /:id` - Elimina un contrato.
+*   `GET /obtener-todos` - Obtiene todos los contratos.
+*   `POST /crear` - Crea un nuevo contrato.
+*   `GET /obtener/:id_contrato` - Obtiene un contrato por ID.
+*   `PUT /actualizar/:id_contrato` - Actualiza un contrato.
+*   `DELETE /eliminar/:id_contrato` - Elimina un contrato.
 
 #### Nómina (`/api/nomina`)
-*   `GET /` - Obtiene todos los registros de nómina.
-*   `GET /:id` - Obtiene un registro de nómina por ID.
-*   `POST /` - Crea un nuevo registro de nómina.
-*   `PUT /:id` - Actualiza un registro de nómina.
-*   `DELETE /:id` - Elimina un registro de nómina.
+*   `GET /obtenernominas` - Obtiene todos los registros de nómina.
+*   `POST /crearnomina` - Crea un nuevo registro de nómina.
+*   `GET /:id_nomina` - Obtiene un registro de nómina por ID.
+*   `PUT /:id_nomina` - Actualiza un registro de nómina.
+*   `DELETE /:id_nomina` - Elimina un registro de nómina.
 
 #### Vacaciones (`/api/vacaciones`)
-*   `GET /` - Obtiene todas las solicitudes de vacaciones.
-*   `GET /:id` - Obtiene una solicitud por ID.
-*   `POST /` - Crea una nueva solicitud de vacaciones.
-*   `PUT /:id` - Actualiza una solicitud.
-*   `DELETE /:id` - Elimina una solicitud.
+*   `GET /obtenervacaciones` - Obtiene todas las solicitudes de vacaciones.
+*   `POST /crearvacacion` - Crea una nueva solicitud de vacaciones.
+*   `GET /:id_vacacion` - Obtiene una solicitud por ID.
+*   `PUT /:id_vacacion` - Actualiza una solicitud.
+*   `DELETE /:id_vacacion` - Elimina una solicitud.
 
 #### Bienestar (Programas) (`/api/bienestar`)
-*   `GET /` - Obtiene todos los programas de bienestar.
-*   `GET /:id` - Obtiene un programa por ID.
-*   `POST /` - Crea un nuevo programa.
-*   `PUT /:id` - Actualiza un programa.
-*   `DELETE /:id` - Elimina un programa.
+*   `GET /obtenertodo-bienestar` - Obtiene todos los programas de bienestar.
+*   `POST /crearbienestar` - Crea un nuevo programa.
+*   `GET /obtener/:id_bienestar` - Obtiene un programa por ID.
+*   `PUT /actualizar/:id_bienestar` - Actualiza un programa.
+*   `DELETE /eliminar/:id_bienestar` - Elimina un programa.
 
 #### Evaluaciones de Desempeño (`/api/evaluaciones`)
-*   `GET /` - Obtiene todas las evaluaciones.
-*   `GET /:id` - Obtiene una evaluación por ID.
-*   `POST /` - Crea una nueva evaluación.
+*   `GET /obtenerevaluaciones` - Obtiene todas las evaluaciones.
+*   `POST /crearevaluacion` - Crea una nueva evaluación.
+*   `GET /:id_evaluacion` - Obtiene una evaluación por ID.
+*   `PUT /:id_evaluacion` - Actualiza una evaluación.
+*   `DELETE /:id_evaluacion` - Elimina una evaluación.
 
 #### Detalles de Evaluación (`/api/detalles-evaluacion`)
-*   `GET /evaluacion/:id_evaluacion` - Obtiene los detalles de una evaluación específica.
-*   `POST /` - Añade un detalle a una evaluación.
+*   `GET /obtenerdetalleevaluacion` - Obtiene los detalles de una evaluación específica.
+*   `POST /creardetalleevaluacion` - Añade un detalle a una evaluación.
+*   `GET /:id_detalle` - Obtiene un detalle por ID.
+*   `PUT /:id_detalle` - Actualiza un detalle.
+*   `DELETE /:id_detalle` - Elimina un detalle.
 
 #### Criterios de Evaluación (`/api/criterios`)
-*   `GET /` - Obtiene todos los criterios.
-*   `POST /` - Crea un nuevo criterio.
-*   `PUT /:id` - Actualiza un criterio.
-*   `DELETE /:id` - Elimina un criterio.
+*   `GET /obtenercriterios` - Obtiene todos los criterios.
+*   `POST /crearcriterio` - Crea un nuevo criterio.
+*   `GET /:id_criterio` - Obtiene un criterio por ID.
+*   `PUT /:id_criterio` - Actualiza un criterio.
+*   `DELETE /:id_criterio` - Elimina un criterio.
 
 #### Carreras (`/api/carreras`)
-*   `GET /` - Obtiene todas las carreras.
-*   `POST /` - Crea una nueva carrera.
-*   `PUT /:id` - Actualiza una carrera.
-*   `DELETE /:id` - Elimina una carrera.
+*   `GET /obtener-todas` - Obtiene todas las carreras.
+*   `POST /crear` - Crea una nueva carrera.
+*   `GET /obtener/:id_carrera` - Obtiene una carrera por ID.
+*   `PUT /actualizar/:id_carrera` - Actualiza una carrera.
+*   `DELETE /eliminar/:id_carrera` - Elimina una carrera.
 
 #### Dashboard (`/api/dashboard`)
-*   `GET /counts` - Obtiene contadores generales (empleados, vacantes, etc.).
+*   `GET /dashboardestadisticas` - Obtiene estadísticas generales.
+*   `GET /dashboardresumen` - Obtiene un resumen del sistema.
 
 #### Mantenimiento (`/api/mantenimiento`)
-*   `POST /backup` - Realiza un backup de la base de datos.
-*   `GET /restore` - Obtiene la lista de backups disponibles.
-*   `POST /restore` - Restaura la base de datos desde un backup específico.
+*   `GET /obtebertodoslosmantenimientos/usuarios` - Obtiene todos los usuarios.
+*   `POST /crearmantenimiento/usuarios` - Crea un nuevo usuario.
+*   `PUT /usuarios/:id_usuario` - Actualiza un usuario.
+*   `DELETE /usuarios/:id_usuario` - Elimina un usuario.
+*   `GET /auditoria` - Obtiene los registros de auditoría.
 
 ## Seguridad
 

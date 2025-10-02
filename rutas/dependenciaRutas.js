@@ -11,8 +11,8 @@ router.use(autenticarToken);
 router.use(soloAdministradores);
 
 // Rutas para Dependencias
-router.get('/', dependenciaControlador.obtenerTodasDependencias);
-router.post('/', validarCreacionDependencia, dependenciaControlador.crearDependencia);
+router.get('/obtenerdependencias', dependenciaControlador.obtenerTodasDependencias);
+router.post('/creardependencia', validarCreacionDependencia, dependenciaControlador.crearDependencia);
 router.get('/:id_dependencia', dependenciaControlador.obtenerDependenciaPorId);
 router.put('/:id_dependencia', validarActualizacionDependencia, dependenciaControlador.actualizarDependencia);
 router.delete('/:id_dependencia', dependenciaControlador.eliminarDependencia);

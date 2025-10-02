@@ -9,9 +9,9 @@ const router = express.Router();
 router.use(autenticarToken);
 
 // Ruta para obtener estadísticas del dashboard
-router.get('/estadisticas', empleadosYAdmin, obtenerEstadisticas);
+router.get('/dashboardestadisticas', empleadosYAdmin, obtenerEstadisticas);
 
 // Ruta para obtener resumen del sistema
-router.get('/resumen', empleadosYAdmin, obtenerResumen);
+router.get('/dashboardresumen', empleadosYAdmin, obtenerResumen);
 
 module.exports = router; 

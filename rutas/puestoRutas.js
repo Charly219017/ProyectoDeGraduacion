@@ -11,10 +11,10 @@ router.use(autenticarToken);
 router.use(soloAdministradores);
 
 // Ruta para obtener todos los puestos
-router.get('/', puestoControlador.obtenerTodosPuestos);
+router.get('/obtenerpuestos', puestoControlador.obtenerTodosPuestos);
 
 // Ruta para crear un nuevo puesto
-router.post('/', validarCreacionPuesto, puestoControlador.crearPuesto);
+router.post('/crearpuesto', validarCreacionPuesto, puestoControlador.crearPuesto);
 
 // Ruta para obtener un puesto por su ID
 router.get('/:id_puesto', puestoControlador.obtenerPuestoPorId);

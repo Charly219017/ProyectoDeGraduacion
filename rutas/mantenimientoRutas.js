@@ -6,10 +6,10 @@ const { validarCreacionUsuario, validarActualizacionUsuario } = require('../util
 const { autenticarToken, soloAdministradores } = require('../middlewares/authMiddleware');
 
 // Ruta para obtener todos los usuarios (solo para administradores)
-router.get('/usuarios', autenticarToken, soloAdministradores, mantenimientoControlador.obtenerTodosUsuarios);
+router.get('/obtebertodoslosmantenimientos/usuarios', autenticarToken, soloAdministradores, mantenimientoControlador.obtenerTodosUsuarios);
 
 // Ruta para crear un nuevo usuario (solo para administradores)
-router.post('/usuarios', autenticarToken, soloAdministradores, validarCreacionUsuario, mantenimientoControlador.crearUsuario);
+router.post('/crearmantenimiento/usuarios', autenticarToken, soloAdministradores, validarCreacionUsuario, mantenimientoControlador.crearUsuario);
 
 // Ruta para actualizar un usuario por su ID (solo para administradores)
 router.put('/usuarios/:id_usuario', autenticarToken, soloAdministradores, validarActualizacionUsuario, mantenimientoControlador.actualizarUsuario);

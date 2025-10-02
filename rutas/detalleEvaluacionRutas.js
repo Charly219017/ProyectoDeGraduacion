@@ -11,8 +11,8 @@ router.use(autenticarToken);
 router.use(soloAdministradores);
 
 // Rutas para Detalles de Evaluación
-router.get('/', detalleEvaluacionControlador.obtenerTodosDetallesEvaluacion);
-router.post('/', validarCreacionDetalleEvaluacion, detalleEvaluacionControlador.crearDetalleEvaluacion);
+router.get('/obtenerdetalleevaluacion', detalleEvaluacionControlador.obtenerTodosDetallesEvaluacion);
+router.post('/creardetalleevaluacion', validarCreacionDetalleEvaluacion, detalleEvaluacionControlador.crearDetalleEvaluacion);
 router.get('/:id_detalle', detalleEvaluacionControlador.obtenerDetalleEvaluacionPorId);
 router.put('/:id_detalle', validarActualizacionDetalleEvaluacion, detalleEvaluacionControlador.actualizarDetalleEvaluacion);
 router.delete('/:id_detalle', detalleEvaluacionControlador.eliminarDetalleEvaluacion);

@@ -11,18 +11,18 @@ router.use(autenticarToken);
 router.use(soloAdministradores);
 
 // Ruta para obtener todas las carreras
-router.get('/', carreraControlador.obtenerTodasCarreras);
+router.get('/obtener-todas', carreraControlador.obtenerTodasCarreras);
 
 // Ruta para crear una nueva carrera
-router.post('/', validarCreacionCarrera, carreraControlador.crearCarrera);
+router.post('/crear', validarCreacionCarrera, carreraControlador.crearCarrera);
 
 // Ruta para obtener una carrera por su ID
-router.get('/:id_carrera', carreraControlador.obtenerCarreraPorId);
+router.get('/obtener/:id_carrera', carreraControlador.obtenerCarreraPorId);
 
 // Ruta para actualizar una carrera por su ID
-router.put('/:id_carrera', validarActualizacionCarrera, carreraControlador.actualizarCarrera);
+router.put('/actualizar/:id_carrera', validarActualizacionCarrera, carreraControlador.actualizarCarrera);
 
 // Ruta para eliminar una carrera por su ID
-router.delete('/:id_carrera', carreraControlador.eliminarCarrera);
+router.delete('/eliminar/:id_carrera', carreraControlador.eliminarCarrera);
 
 module.exports = router;
