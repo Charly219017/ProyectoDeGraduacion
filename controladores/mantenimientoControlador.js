@@ -5,6 +5,9 @@ const path = require('path');
 const fs = require('fs');
 const config = require('../configuracion/configuracion.js');
 const logger = require('../utilidades/logger');
+const { validationResult } = require('express-validator');
+const bcrypt = require('bcryptjs');
+const { Usuarios, Roles, Auditoria } = require('../modelos');
 
 /**
  * Controlador para obtener una lista completa de todos los usuarios
@@ -64,16 +67,15 @@ const crearUsuario = async (req, res) => {
       creado_por: req.usuario.id
     });
     
-    //Se usa el campo 'descripcion' y se serializa el objeto JSON
     await Auditoria.create({
+      tabla_afectada: 'usuarios',
+      id_registro_text: String(nuevoUsuario.id_usuario),
       accion: 'CREAR_USUARIO',
       usuario: req.usuario.id,
       descripcion: JSON.stringify({ 
         mensaje: `Creación de usuario: ${nuevoUsuario.nombre_usuario}`,
         nuevo_usuario_id: nuevoUsuario.id_usuario
-      }),
-      tabla_afectada: 'usuarios',
-      id_registro_afectado: nuevoUsuario.id_usuario
+      })
     });
 
     logger.info(`Usuario creado exitosamente: ${nuevoUsuario.nombre_usuario} por ${req.usuario.nombre_usuario}`);
@@ -124,16 +126,14 @@ const actualizarUsuario = async (req, res) => {
 
     await usuarioAActualizar.update(datosActualizados);
 
-    // Preparamos los datos para la auditoría, excluyendo la contraseña.
     const datosParaAuditoria = { ...req.body };
     delete datosParaAuditoria.contrasena;
 
-    //Se usa el campo 'descripcion' y se serializa el objeto JSON
     await Auditoria.create({
+      tabla_afectada: 'usuarios',
+      id_registro_text: String(id_usuario),
       accion: 'ACTUALIZAR_USUARIO',
       usuario: req.usuario.id,
-      tabla_afectada: 'usuarios',
-      id_registro: id_usuario,
       valor_anterior: JSON.stringify(valorAnterior),
       valor_nuevo: JSON.stringify(datosParaAuditoria),
       descripcion: JSON.stringify({ mensaje: `Actualización de usuario: ${usuarioAActualizar.nombre_usuario}` })
@@ -168,10 +168,10 @@ const eliminarUsuario = async (req, res) => {
     });
 
     await Auditoria.create({
+      tabla_afectada: 'usuarios',
+      id_registro_text: String(usuarioAEliminar.id_usuario),
       accion: 'ELIMINAR_USUARIO (LÓGICO)',
       usuario: req.usuario.id,
-      tabla_afectada: 'usuarios',
-      id_registro: usuarioAEliminar.id_usuario,
       campo_modificado: 'activo',
       valor_anterior: 'true',
       valor_nuevo: 'false',

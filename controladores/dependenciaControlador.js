@@ -16,15 +16,7 @@ const crearDependencia = async (req, res) => {
             });
         }
 
-        const nuevaDependencia = await Dependencias.create(req.body);
-
-        await Auditoria.create({
-            tabla_afectada: 'dependencias',
-            id_registro: nuevaDependencia.id_dependencia,
-            accion: 'CREAR',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({ mensaje: `Creación de nueva dependencia: puesto superior ${nuevaDependencia.id_puesto_superior} -> puesto subordinado ${nuevaDependencia.id_puesto_subordinado}` })
-        });
+        const nuevaDependencia = await Dependencias.create(req.body, { usuario: req.usuario });
 
         logger.info(`Dependencia creada exitosamente con ID: ${nuevaDependencia.id_dependencia} por ${req.usuario.nombre_usuario}`);
         res.status(201).json({
@@ -106,15 +98,7 @@ const actualizarDependencia = async (req, res) => {
             return res.status(404).json({ mensaje: 'Dependencia no encontrada' });
         }
 
-        await dependenciaAActualizar.update(req.body);
-
-        await Auditoria.create({
-            tabla_afectada: 'dependencias',
-            id_registro: dependenciaAActualizar.id_dependencia,
-            accion: 'ACTUALIZAR',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({ mensaje: `Actualización de dependencia con ID: ${dependenciaAActualizar.id_dependencia}` })
-        });
+        await dependenciaAActualizar.update(req.body, { usuario: req.usuario });
 
         logger.info(`Dependencia con ID ${id_dependencia} actualizada por ${req.usuario.nombre_usuario}`);
         res.json({
@@ -140,15 +124,7 @@ const eliminarDependencia = async (req, res) => {
             return res.status(404).json({ mensaje: 'Dependencia no encontrada' });
         }
 
-        await dependenciaAEliminar.destroy();
-
-        await Auditoria.create({
-            tabla_afectada: 'dependencias',
-            id_registro: id_dependencia,
-            accion: 'ELIMINAR',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({ mensaje: `Eliminación de dependencia con ID: ${id_dependencia}` })
-        });
+        await dependenciaAEliminar.destroy({ usuario: req.usuario });
 
         logger.info(`Dependencia con ID ${id_dependencia} eliminada por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Dependencia eliminada exitosamente' });

@@ -19,16 +19,7 @@ const crearContrato = async (req, res) => {
         const nuevoContrato = await Contratos.create({
             ...req.body,
             creado_por: req.usuario.id
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'contratos',
-            id_registro: nuevoContrato.id_contrato,
-            accion: 'CREAR',
-            usuario: req.usuario.id,
-            valor_nuevo: JSON.stringify(nuevoContrato),
-            descripcion: JSON.stringify({ mensaje: `Creación de nuevo contrato para el empleado con ID: ${nuevoContrato.id_empleado}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Contrato creado exitosamente con ID: ${nuevoContrato.id_contrato} por ${req.usuario.nombre_usuario}`);
         res.status(201).json({
@@ -113,23 +104,11 @@ const actualizarContrato = async (req, res) => {
             return res.status(404).json({ mensaje: 'Contrato no encontrado' });
         }
 
-        const valorAnterior = { ...contratoAActualizar.get({ plain: true }) };
-
         await contratoAActualizar.update({
             ...req.body,
             actualizado_por: req.usuario.id,
             fecha_actualizacion: new Date()
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'contratos',
-            id_registro: contratoAActualizar.id_contrato,
-            accion: 'ACTUALIZAR',
-            usuario: req.usuario.id,
-            valor_anterior: JSON.stringify(valorAnterior),
-            valor_nuevo: JSON.stringify(req.body),
-            descripcion: JSON.stringify({ mensaje: `Actualización de contrato con ID: ${contratoAActualizar.id_contrato}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Contrato con ID ${id_contrato} actualizado por ${req.usuario.nombre_usuario}`);
         res.json({
@@ -156,16 +135,7 @@ const eliminarContrato = async (req, res) => {
         }
 
         // Borrado lógico
-        await contratoAEliminar.update({ activo: false });
-
-        await Auditoria.create({
-            tabla_afectada: 'contratos',
-            id_registro: id_contrato,
-            accion: 'ELIMINAR',
-            usuario: req.usuario.id,
-            valor_anterior: JSON.stringify(contratoAEliminar),
-            descripcion: JSON.stringify({ mensaje: `Eliminación lógica de contrato con ID: ${id_contrato}` })
-        });
+        await contratoAEliminar.update({ activo: false }, { usuario: req.usuario });
 
         logger.info(`Contrato con ID ${id_contrato} eliminado lógicamente por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Contrato eliminado exitosamente' });

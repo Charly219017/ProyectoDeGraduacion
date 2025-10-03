@@ -19,15 +19,7 @@ const crearVacacion = async (req, res) => {
         const nuevaVacacion = await Vacaciones.create({
             ...req.body,
             creado_por: req.usuario.id
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'vacaciones',
-            id_registro: nuevaVacacion.id_vacacion,
-            accion: 'CREAR',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({ mensaje: `Creación de solicitud de vacaciones para el empleado ID ${nuevaVacacion.id_empleado}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Solicitud de vacaciones creada exitosamente con ID: ${nuevaVacacion.id_vacacion} por ${req.usuario.nombre_usuario}`);
         res.status(201).json({
@@ -116,15 +108,7 @@ const actualizarVacacion = async (req, res) => {
             ...req.body,
             actualizado_por: req.usuario.id,
             fecha_actualizacion: new Date()
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'vacaciones',
-            id_registro: vacacionAActualizar.id_vacacion,
-            accion: 'ACTUALIZAR',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({ mensaje: `Actualización de solicitud de vacaciones con ID: ${vacacionAActualizar.id_vacacion}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Vacación con ID ${id_vacacion} actualizada por ${req.usuario.nombre_usuario}`);
         res.json({
@@ -157,16 +141,7 @@ const eliminarVacacion = async (req, res) => {
             activo: false,
             actualizado_por: req.usuario.id,
             fecha_actualizacion: new Date()
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'vacaciones',
-            id_registro: id_vacacion,
-            accion: 'ELIMINAR LÓGICAMENTE',
-            usuario: req.usuario.id,
-            valor_anterior: JSON.stringify(vacacionAEliminar),
-            descripcion: JSON.stringify({ mensaje: `Eliminación lógica de solicitud de vacaciones con ID: ${id_vacacion}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Solicitud de vacaciones con ID ${id_vacacion} eliminada lógicamente por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Solicitud de vacaciones eliminada exitosamente' });

@@ -19,7 +19,7 @@ const crearCarrera = async (req, res) => {
         const nuevaCarrera = await Carreras.create({
             ...req.body,
             creado_por: req.usuario.id
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Carrera creada exitosamente: ${nuevaCarrera.nombre_carrera} por ${req.usuario.nombre_usuario}`);
         res.status(201).json({
@@ -93,7 +93,7 @@ const actualizarCarrera = async (req, res) => {
         await carreraAActualizar.update({
             ...req.body,
             actualizado_por: req.usuario.id
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Carrera con ID ${id_carrera} actualizada por ${req.usuario.nombre_usuario}`);
         res.json({
@@ -122,7 +122,7 @@ const eliminarCarrera = async (req, res) => {
         await carreraAEliminar.update({
             activo: false,
             actualizado_por: req.usuario.id
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Carrera con ID ${id_carrera} eliminada por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Carrera eliminada exitosamente' });

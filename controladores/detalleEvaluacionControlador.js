@@ -19,15 +19,7 @@ const crearDetalleEvaluacion = async (req, res) => {
         const nuevoDetalle = await DetalleEvaluacion.create({
             ...req.body,
             creado_por: req.usuario.id
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'detalle_evaluacion',
-            id_registro: nuevoDetalle.id_detalle,
-            accion: 'CREAR',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({ mensaje: `Creación de nuevo detalle para la evaluación ID ${nuevoDetalle.id_evaluacion}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Detalle de evaluación creado exitosamente con ID: ${nuevoDetalle.id_detalle} por ${req.usuario.nombre_usuario}`);
         res.status(201).json({
@@ -118,15 +110,7 @@ const actualizarDetalleEvaluacion = async (req, res) => {
             return res.status(404).json({ mensaje: 'Detalle de evaluación no encontrado' });
         }
 
-        await detalleAActualizar.update(req.body);
-
-        await Auditoria.create({
-            tabla_afectada: 'detalle_evaluacion',
-            id_registro: detalleAActualizar.id_detalle,
-            accion: 'ACTUALIZAR',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({ mensaje: `Actualización de detalle de evaluación con ID: ${detalleAActualizar.id_detalle}` })
-        });
+        await detalleAActualizar.update(req.body, { usuario: req.usuario });
 
         logger.info(`Detalle de evaluación con ID ${id_detalle} actualizado por ${req.usuario.nombre_usuario}`);
         res.json({
@@ -153,16 +137,7 @@ const eliminarDetalleEvaluacion = async (req, res) => {
         }
 
         // Borrado lógico
-        await detalleAEliminar.update({ activo: false });
-
-        await Auditoria.create({
-            tabla_afectada: 'detalle_evaluacion',
-            id_registro: id_detalle,
-            accion: 'ELIMINAR',
-            usuario: req.usuario.id,
-            valor_anterior: JSON.stringify(detalleAEliminar),
-            descripcion: JSON.stringify({ mensaje: `Eliminación lógica de detalle de evaluación con ID: ${id_detalle}` })
-        });
+        await detalleAEliminar.update({ activo: false }, { usuario: req.usuario });
 
         logger.info(`Detalle de evaluación con ID ${id_detalle} eliminado lógicamente por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Detalle de evaluación eliminado exitosamente' });

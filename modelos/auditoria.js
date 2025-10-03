@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
         
-    id_registro_tex: {
+    id_registro_text: {
       type: DataTypes.TEXT,
       allowNull: true 
     },

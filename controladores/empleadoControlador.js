@@ -19,19 +19,7 @@ const crearEmpleado = async (req, res) => {
         const nuevoEmpleado = await Empleados.create({
             ...req.body,
             creado_por: req.usuario.id
-        });
-
-        // Registrar la acción en la tabla de auditoría
-        await Auditoria.create({
-            accion: 'CREAR_EMPLEADO',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({
-                mensaje: `Creación de nuevo empleado: ${nuevoEmpleado.nombre_completo}`,
-                nuevo_empleado_id: nuevoEmpleado.id_empleado,
-            }),
-            tabla_afectada: 'empleados',
-            id_registro_afectado: nuevoEmpleado.id_empleado
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Empleado creado exitosamente: ${nuevoEmpleado.nombre_completo} por ${req.usuario.nombre_usuario}`);
         res.status(201).json({
@@ -136,20 +124,7 @@ const actualizarEmpleado = async (req, res) => {
         await empleadoAActualizar.update({
             ...req.body,
             actualizado_por: req.usuario.id
-        });
-
-        // Registrar la acción en la tabla de auditoría
-        await Auditoria.create({
-            accion: 'ACTUALIZAR_EMPLEADO',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({
-                mensaje: `Actualización de empleado: ${empleadoAActualizar.nombre_completo}`,
-                empleado_actualizado_id: empleadoAActualizar.id_empleado,
-                nuevos_datos: req.body
-            }),
-            tabla_afectada: 'empleados',
-            id_registro_afectado: empleadoAActualizar.id_empleado
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Empleado con ID ${id_empleado} actualizado por ${req.usuario.nombre_usuario}`);
         res.json({
@@ -179,19 +154,7 @@ const eliminarEmpleado = async (req, res) => {
         await empleadoAEliminar.update({ 
             activo: false,
             actualizado_por: req.usuario.id
-        });
-
-        // Registrar la acción en la tabla de auditoría
-        await Auditoria.create({
-            accion: 'ELIMINAR_EMPLEADO',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({
-                mensaje: `Eliminación de empleado: ${empleadoAEliminar.nombre_completo}`,
-                empleado_eliminado_id: empleadoAEliminar.id_empleado,
-            }),
-            tabla_afectada: 'empleados',
-            id_registro_afectado: empleadoAEliminar.id_empleado
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Empleado con ID ${id_empleado} eliminado por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Empleado eliminado exitosamente' });

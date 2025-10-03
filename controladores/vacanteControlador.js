@@ -19,15 +19,7 @@ const crearVacante = async (req, res) => {
         const nuevaVacante = await Vacantes.create({
             ...req.body,
             creado_por: req.usuario.id
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'vacantes',
-            id_registro: nuevaVacante.id_vacante,
-            accion: 'CREAR',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({ mensaje: `Creación de nueva vacante: ${nuevaVacante.titulo}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Vacante creada exitosamente: ${nuevaVacante.titulo} por ${req.usuario.nombre_usuario}`);
         res.status(201).json({
@@ -128,15 +120,7 @@ const actualizarVacante = async (req, res) => {
         await vacanteAActualizar.update({
             ...req.body,
             actualizado_por: req.usuario.id
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'vacantes',
-            id_registro: vacanteAActualizar.id_vacante,
-            accion: 'ACTUALIZAR',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({ mensaje: `Actualización de vacante con ID: ${vacanteAActualizar.id_vacante}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Vacante con ID ${id_vacante} actualizada por ${req.usuario.nombre_usuario}`);
         res.json({
@@ -167,15 +151,7 @@ const eliminarVacante = async (req, res) => {
             activo: false,
             actualizado_por: req.usuario.id,
             fecha_actualizacion: new Date()
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'vacantes',
-            id_registro: id_vacante,
-            accion: 'ELIMINAR',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({ mensaje: `Eliminación de vacante con ID: ${id_vacante}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Vacante con ID ${id_vacante} eliminada por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Vacante eliminada exitosamente' });

@@ -19,15 +19,7 @@ const crearNomina = async (req, res) => {
         const nuevaNomina = await Nomina.create({
             ...req.body,
             creado_por: req.usuario.id
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'nomina',
-            id_registro: nuevaNomina.id_nomina,
-            accion: 'CREAR',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({ mensaje: `Creación de nómina para el empleado ID ${nuevaNomina.id_empleado} para el mes ${nuevaNomina.mes}/${nuevaNomina.anio}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Nómina creada exitosamente con ID: ${nuevaNomina.id_nomina} por ${req.usuario.nombre_usuario}`);
         res.status(201).json({
@@ -118,15 +110,7 @@ const actualizarNomina = async (req, res) => {
             ...req.body,
             actualizado_por: req.usuario.id,
             fecha_actualizacion: new Date()
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'nomina',
-            id_registro: nominaAActualizar.id_nomina,
-            accion: 'ACTUALIZAR',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({ mensaje: `Actualización de nómina con ID: ${nominaAActualizar.id_nomina}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Nómina con ID ${id_nomina} actualizada por ${req.usuario.nombre_usuario}`);
         res.json({
@@ -158,15 +142,7 @@ const eliminarNomina = async (req, res) => {
             activo: false,
             actualizado_por: req.usuario.id,
             fecha_actualizacion: new Date()
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'nomina',
-            id_registro: id_nomina,
-            accion: 'ELIMINAR LÓGICAMENTE',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({ mensaje: `Eliminación lógica de nómina con ID: ${id_nomina}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Nómina con ID ${id_nomina} eliminada lógicamente por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Registro de nómina eliminado exitosamente' });

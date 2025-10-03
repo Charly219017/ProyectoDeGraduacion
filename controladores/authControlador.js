@@ -44,7 +44,7 @@ const login = async (req, res) => {
           errores: errores.array()
         }),
         tabla_afectada: null,
-        id_registro_afectado: null,
+        id_registro_text: null,
       });
       return res.status(400).json({
         mensaje: 'Datos de entrada inválidos',
@@ -75,7 +75,7 @@ const login = async (req, res) => {
           correo_ingresado: nombre_usuario
         }),
         tabla_afectada: 'usuarios',
-        id_registro_afectado: null
+        id_registro_text: null
       });
       return res.status(401).json({ mensaje: 'Credenciales inválidas' });
     }
@@ -94,7 +94,7 @@ const login = async (req, res) => {
           }
         }),
         tabla_afectada: 'usuarios',
-        id_registro_afectado: usuario.id_usuario
+        id_registro_text: usuario.id_usuario
       });
       return res.status(401).json({ mensaje: 'Usuario inactivo o credenciales inválidas' });
     }
@@ -115,7 +115,7 @@ const login = async (req, res) => {
           }
         }),
         tabla_afectada: 'usuarios',
-        id_registro_afectado: usuario.id_usuario
+        id_registro_text: usuario.id_usuario
       });
       return res.status(401).json({ mensaje: 'Credenciales inválidas' });
     }
@@ -135,7 +135,7 @@ const login = async (req, res) => {
         }
       }),
       tabla_afectada: 'usuarios',
-      id_registro_afectado: usuario.id_usuario
+      id_registro_text: String(usuario.id_usuario)
     });
 
     logger.info(`Login exitoso para usuario: ${usuario.nombre_usuario}`);

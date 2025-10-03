@@ -78,7 +78,7 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'empleados',
     timestamps: true,
     createdAt: 'fecha_creacion',
-    updatedAt: 'fecha_actualizacion'
+    updatedAt: 'fecha_actualizacion' 
   });
 
   Empleados.associate = (models) => {

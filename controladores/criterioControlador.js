@@ -19,16 +19,7 @@ const crearCriterio = async (req, res) => {
         const nuevoCriterio = await Criterios.create({
             ...req.body,
             creado_por: req.usuario.id
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'criterios',
-            id_registro: nuevoCriterio.id_criterio,
-            accion: 'CREAR',
-            usuario: req.usuario.id,
-            valor_nuevo: JSON.stringify(nuevoCriterio),
-            descripcion: JSON.stringify({ mensaje: `Creación de nuevo criterio: ${nuevoCriterio.nombre_criterio}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Criterio creado exitosamente: ${nuevoCriterio.nombre_criterio} por ${req.usuario.nombre_usuario}`);
         res.status(201).json({
@@ -109,19 +100,7 @@ const actualizarCriterio = async (req, res) => {
             return res.status(404).json({ mensaje: 'Criterio no encontrado' });
         }
 
-        const valorAnterior = { ...criterioAActualizar.get({ plain: true }) };
-
-        await criterioAActualizar.update(req.body);
-
-        await Auditoria.create({
-            tabla_afectada: 'criterios',
-            id_registro: criterioAActualizar.id_criterio,
-            accion: 'ACTUALIZAR',
-            usuario: req.usuario.id,
-            valor_anterior: JSON.stringify(valorAnterior),
-            valor_nuevo: JSON.stringify(req.body),
-            descripcion: JSON.stringify({ mensaje: `Actualización de criterio con ID: ${criterioAActualizar.id_criterio}` })
-        });
+        await criterioAActualizar.update(req.body, { usuario: req.usuario });
 
         logger.info(`Criterio con ID ${id_criterio} actualizado por ${req.usuario.nombre_usuario}`);
         res.json({
@@ -148,16 +127,7 @@ const eliminarCriterio = async (req, res) => {
         }
 
         // Borrado lógico
-        await criterioAEliminar.update({ activo: false });
-
-        await Auditoria.create({
-            tabla_afectada: 'criterios',
-            id_registro: id_criterio,
-            accion: 'ELIMINAR',
-            usuario: req.usuario.id,
-            valor_anterior: JSON.stringify(criterioAEliminar),
-            descripcion: JSON.stringify({ mensaje: `Eliminación lógica de criterio con ID: ${id_criterio}` })
-        });
+        await criterioAEliminar.update({ activo: false }, { usuario: req.usuario });
 
         logger.info(`Criterio con ID ${id_criterio} eliminado lógicamente por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Criterio eliminado exitosamente' });

@@ -19,15 +19,7 @@ const crearEvaluacion = async (req, res) => {
         const nuevaEvaluacion = await Evaluaciones.create({
             ...req.body,
             creado_por: req.usuario.id
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'evaluaciones',
-            id_registro: nuevaEvaluacion.id_evaluacion,
-            accion: 'CREAR',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({ mensaje: `Creación de nueva evaluación para el empleado ID ${nuevaEvaluacion.id_empleado}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Evaluación creada exitosamente con ID: ${nuevaEvaluacion.id_evaluacion} por ${req.usuario.nombre_usuario}`);
         res.status(201).json({
@@ -110,15 +102,7 @@ const actualizarEvaluacion = async (req, res) => {
             return res.status(404).json({ mensaje: 'Evaluación no encontrada' });
         }
 
-        await evaluacionAActualizar.update(req.body);
-
-        await Auditoria.create({
-            tabla_afectada: 'evaluaciones',
-            id_registro: evaluacionAActualizar.id_evaluacion,
-            accion: 'ACTUALIZAR',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({ mensaje: `Actualización de evaluación con ID: ${evaluacionAActualizar.id_evaluacion}` })
-        });
+        await evaluacionAActualizar.update(req.body, { usuario: req.usuario });
 
         logger.info(`Evaluación con ID ${id_evaluacion} actualizada por ${req.usuario.nombre_usuario}`);
         res.json({
@@ -145,16 +129,7 @@ const eliminarEvaluacion = async (req, res) => {
         }
 
         // Borrado lógico
-        await evaluacionAEliminar.update({ activo: false });
-
-        await Auditoria.create({
-            tabla_afectada: 'evaluaciones',
-            id_registro: id_evaluacion,
-            accion: 'ELIMINAR',
-            usuario: req.usuario.id,
-            valor_anterior: JSON.stringify(evaluacionAEliminar),
-            descripcion: JSON.stringify({ mensaje: `Eliminación lógica de evaluación con ID: ${id_evaluacion}` })
-        });
+        await evaluacionAEliminar.update({ activo: false }, { usuario: req.usuario });
 
         logger.info(`Evaluación con ID ${id_evaluacion} eliminada lógicamente por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Evaluación eliminada exitosamente' });

@@ -4,6 +4,7 @@ const path = require('path');
 const { Sequelize, DataTypes } = require('sequelize'); // <-- Importación de DataTypes agregada
 const config = require('../configuracion/configuracion');
 const logger = require('../utilidades/logger');
+const auditHooks = require('../utilidades/auditHook');
 
 // Configuración del entorno
 const env = process.env.NODE_ENV || 'development';
@@ -49,6 +50,15 @@ fs.readdirSync(modelsPath)
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
+  }
+});
+
+// Aplicar hooks de auditoría a todos los modelos excepto Auditoria
+Object.values(db.sequelize.models).forEach(model => {
+  if (model.name !== 'Auditoria') { // Prevenir bucles infinitos
+    for (const hookName in auditHooks) {
+      model.addHook(hookName, auditHooks[hookName]);
+    }
   }
 });
 

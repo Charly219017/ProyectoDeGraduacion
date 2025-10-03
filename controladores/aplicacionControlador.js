@@ -22,16 +22,7 @@ const crearAplicacion = async (req, res) => {
         const nuevaAplicacion = await Aplicaciones.create({
             ...datosAplicacion,
             creado_por: req.usuario.id
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'aplicaciones',
-            id_registro: nuevaAplicacion.id_aplicacion,
-            accion: 'CREAR',
-            usuario: req.usuario.id,
-            valor_nuevo: JSON.stringify(nuevaAplicacion),
-            descripcion: JSON.stringify({ mensaje: `Creación de nueva aplicación con ID: ${nuevaAplicacion.id_aplicacion}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Aplicación creada exitosamente con ID: ${nuevaAplicacion.id_aplicacion} por ${req.usuario.nombre_usuario}`);
         res.status(201).json({
@@ -134,22 +125,10 @@ const actualizarAplicacion = async (req, res) => {
             return res.status(404).json({ mensaje: 'Aplicación no encontrada' });
         }
 
-        const valorAnterior = { ...aplicacionAActualizar.get({ plain: true }) };
-
         // Excluir fecha_aplicacion para evitar que se actualice
         const { fecha_aplicacion, ...datosActualizacion } = req.body;
 
-        await aplicacionAActualizar.update(datosActualizacion);
-
-        await Auditoria.create({
-            tabla_afectada: 'aplicaciones',
-            id_registro: aplicacionAActualizar.id_aplicacion,
-            accion: 'ACTUALIZAR',
-            usuario: req.usuario.id,
-            valor_anterior: JSON.stringify(valorAnterior),
-            valor_nuevo: JSON.stringify(datosActualizacion),
-            descripcion: JSON.stringify({ mensaje: `Actualización de aplicación con ID: ${aplicacionAActualizar.id_aplicacion}` })
-        });
+        await aplicacionAActualizar.update(datosActualizacion, { usuario: req.usuario });
 
         logger.info(`Aplicación con ID ${id_aplicacion} actualizada por ${req.usuario.nombre_usuario}`);
         res.json({
@@ -178,16 +157,7 @@ const eliminarAplicacion = async (req, res) => {
         // Borrado lógico usando el campo activo
         await aplicacionAEliminar.update({
             activo: false
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'aplicaciones',
-            id_registro: id_aplicacion,
-            accion: 'ELIMINAR',
-            usuario: req.usuario.id,
-            valor_anterior: JSON.stringify(aplicacionAEliminar),
-            descripcion: JSON.stringify({ mensaje: `Eliminación de aplicación con ID: ${id_aplicacion}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Aplicación con ID ${id_aplicacion} eliminada por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Aplicación eliminada exitosamente' });

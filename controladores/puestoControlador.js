@@ -19,19 +19,7 @@ const crearPuesto = async (req, res) => {
         const nuevoPuesto = await Puestos.create({
             ...req.body,
             creado_por: req.usuario.id
-        });
-
-        // Registrar la acción en la tabla de auditoría
-        await Auditoria.create({
-            accion: 'CREAR_PUESTO',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({
-                mensaje: `Creación de nuevo puesto: ${nuevoPuesto.nombre_puesto}`,
-                nuevo_puesto_id: nuevoPuesto.id_puesto,
-            }),
-            tabla_afectada: 'puestos',
-            id_registro_afectado: nuevoPuesto.id_puesto
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Puesto creado exitosamente: ${nuevoPuesto.nombre_puesto} por ${req.usuario.nombre_usuario}`);
         res.status(201).json({
@@ -118,20 +106,7 @@ const actualizarPuesto = async (req, res) => {
         await puestoAActualizar.update({
             ...req.body,
             actualizado_por: req.usuario.id
-        });
-
-        // Registrar la acción en la tabla de auditoría
-        await Auditoria.create({
-            accion: 'ACTUALIZAR_PUESTO',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({
-                mensaje: `Actualización de puesto: ${puestoAActualizar.nombre_puesto}`,
-                puesto_actualizado_id: puestoAActualizar.id_puesto,
-                nuevos_datos: req.body
-            }),
-            tabla_afectada: 'puestos',
-            id_registro_afectado: puestoAActualizar.id_puesto
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Puesto con ID ${id_puesto} actualizado por ${req.usuario.nombre_usuario}`);
         res.json({
@@ -161,19 +136,7 @@ const eliminarPuesto = async (req, res) => {
         await puestoAEliminar.update({
             activo: false,
             actualizado_por: req.usuario.id
-        });
-
-        // Registrar la acción en la tabla de auditoría
-        await Auditoria.create({
-            accion: 'ELIMINAR_PUESTO',
-            usuario: req.usuario.id,
-            descripcion: JSON.stringify({
-                mensaje: `Eliminación de puesto: ${puestoAEliminar.nombre_puesto}`,
-                puesto_eliminado_id: puestoAEliminar.id_puesto,
-            }),
-            tabla_afectada: 'puestos',
-            id_registro_afectado: puestoAEliminar.id_puesto
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Puesto con ID ${id_puesto} eliminado por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Puesto eliminado exitosamente' });

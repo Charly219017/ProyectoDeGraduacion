@@ -19,16 +19,7 @@ const crearCandidato = async (req, res) => {
         const nuevoCandidato = await Candidatos.create({
             ...req.body,
             creado_por: req.usuario.id
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'candidatos',
-            id_registro: nuevoCandidato.id_candidato,
-            accion: 'CREAR',
-            usuario: req.usuario.id,
-            valor_nuevo: JSON.stringify(nuevoCandidato),
-            descripcion: JSON.stringify({ mensaje: `Creación de nuevo candidato: ${nuevoCandidato.nombre_completo}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Candidato creado exitosamente: ${nuevoCandidato.nombre_completo} por ${req.usuario.nombre_usuario}`);
         res.status(201).json({
@@ -109,19 +100,7 @@ const actualizarCandidato = async (req, res) => {
             return res.status(404).json({ mensaje: 'Candidato no encontrado' });
         }
 
-        const valorAnterior = { ...candidatoAActualizar.get({ plain: true }) };
-
-        await candidatoAActualizar.update(req.body);
-
-        await Auditoria.create({
-            tabla_afectada: 'candidatos',
-            id_registro: candidatoAActualizar.id_candidato,
-            accion: 'ACTUALIZAR',
-            usuario: req.usuario.id,
-            valor_anterior: JSON.stringify(valorAnterior),
-            valor_nuevo: JSON.stringify(req.body),
-            descripcion: JSON.stringify({ mensaje: `Actualización de candidato con ID: ${candidatoAActualizar.id_candidato}` })
-        });
+        await candidatoAActualizar.update(req.body, { usuario: req.usuario });
 
         logger.info(`Candidato con ID ${id_candidato} actualizado por ${req.usuario.nombre_usuario}`);
         res.json({
@@ -150,16 +129,7 @@ const eliminarCandidato = async (req, res) => {
         // Borrado lógico usando el campo activo
         await candidatoAEliminar.update({
             activo: false
-        });
-
-        await Auditoria.create({
-            tabla_afectada: 'candidatos',
-            id_registro: id_candidato,
-            accion: 'ELIMINAR',
-            usuario: req.usuario.id,
-            valor_anterior: JSON.stringify(candidatoAEliminar),
-            descripcion: JSON.stringify({ mensaje: `Eliminación de candidato con ID: ${id_candidato}` })
-        });
+        }, { usuario: req.usuario });
 
         logger.info(`Candidato con ID ${id_candidato} eliminado por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Candidato eliminado exitosamente' });
