@@ -1,7 +1,7 @@
 // Carpeta: backend/controladores/authControlador.js
 
 const { validationResult } = require('express-validator');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Sequelize = require('sequelize');
 const { Usuarios, Roles, Auditoria } = require('../modelos');

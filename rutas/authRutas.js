@@ -16,8 +16,8 @@ const router = express.Router();
 const validacionesLogin = [
   body('nombre_usuario')
     .trim()
-    .isLength({ min: 3, max: 50 })
-    .withMessage('El nombre de usuario debe tener entre 3 y 50 caracteres'),
+    .isLength({ min: 6, max: 50 })
+    .withMessage('El nombre de usuario debe tener entre 6 y 50 caracteres'),
   body('contrasena')
     .isLength({ min: 6 })
     .withMessage('La contraseña debe tener al menos 6 caracteres')
@@ -27,7 +27,7 @@ const validacionesLogin = [
 const validacionesRegistro = [
   body('nombre_usuario')
     .trim()
-    .isLength({ min: 3, max: 50 })
+    .isLength({ min: 6, max: 50 })
     .withMessage('El nombre de usuario debe tener entre 3 y 50 caracteres')
     .matches(/^[a-zA-Z0-9_]+$/)
     .withMessage('El nombre de usuario solo puede contener letras, números y guiones bajos'),
@@ -56,6 +56,9 @@ router.post('/registro',
   validacionesRegistro, 
   registro
 );
+
+// Ruta para obtener perfil del usuario actual
+router.get('/perfil', autenticarToken, perfil);
 
 // Ruta para obtener perfil del usuario actual
 router.get('/perfil', autenticarToken, perfil);

@@ -8,7 +8,7 @@ const { Usuarios } = require('../modelos');
  */
 const validarCreacionUsuario = [
   body('nombre_usuario')
-    .isLength({ min: 3 }).withMessage('El nombre de usuario debe tener al menos 3 caracteres'),
+    .isLength({ min: 6 }).withMessage('El nombre de usuario debe tener al menos 6 caracteres'),
   // Validación de unicidad para nombre_usuario
   body('nombre_usuario').custom(async (value) => {
     const usuario = await Usuarios.findOne({ where: { nombre_usuario: value } });
@@ -25,7 +25,7 @@ const validarCreacionUsuario = [
       }
     }),
   body('contrasena')
-    .isLength({ min: 6 }).withMessage('La contraseña debe tener al menos 6 caracteres'),
+    .isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres'),
   body('id_rol')
     .isInt({ gt: 0 }).withMessage('El ID de rol debe ser un número entero positivo')
 ];
@@ -37,7 +37,7 @@ const validarCreacionUsuario = [
 const validarActualizacionUsuario = [
   body('nombre_usuario')
     .optional()
-    .isLength({ min: 3 }).withMessage('El nombre de usuario debe tener al menos 3 caracteres'),
+    .isLength({ min: 6 }).withMessage('El nombre de usuario debe tener al menos 6 caracteres'),
   body('correo')
     .optional()
     .isEmail().withMessage('El correo electrónico no es válido')
@@ -54,7 +54,7 @@ const validarActualizacionUsuario = [
   body('id_rol')
     .optional()
     .isInt({ gt: 0 }).withMessage('El ID de rol debe ser un número entero positivo'),
-  body('estadousuario')
+  body('activo')
     .optional()
     .isBoolean().withMessage('El estado del usuario debe ser un valor booleano')
 ];

@@ -6,7 +6,7 @@ const fs = require('fs');
 const config = require('../configuracion/configuracion.js');
 const logger = require('../utilidades/logger');
 const { validationResult } = require('express-validator');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 const { Usuarios, Roles, Auditoria } = require('../modelos');
 
 /**
