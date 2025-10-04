@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node aplicacion.js",
     "dev": "nodemon aplicacion.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "start:mcp": "set API_KEY=sk-user-gtMsATUYVOGlUsGsfk4Qv1H3dVikTXJCHjNoewCauI_Xm501DSr_3lPp6JT9FTwBhryvbvDJTS1OIApVOmEjkzfmedl68WhH8sU6m_PRJjgdNdmtCGOZXKnh_75x7qqWcbk && npx @testsprite/testsprite-mcp@latest"
   },
   "keywords": [
     "crm",
@@ -33,6 +34,8 @@
     "winston": "^3.11.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "jest": "^30.2.0",
+    "nodemon": "^3.0.2",
+    "supertest": "^7.1.4"
   }
 }
