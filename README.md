@@ -1,3 +1,7 @@
+# para correr prueba es 
+npm test
+
+
 # Sistema Jireh - Backend
 
 Backend del Sistema Jireh, un CRM de gestión de Recursos Humanos para escuelas de enfermería.

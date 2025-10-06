@@ -39,16 +39,20 @@ const vacacionRutas = require('./rutas/vacacionRutas');
 const app = express();
 
 // --- Middlewares de seguridad, configuración y logs ---
-app.use(helmet(/* ... */));
-app.use(cors(/* ... */));
-app.use(morgan(/* ... */));
+app.use(helmet());
+app.use(cors());
+app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
 // --- Rutas de la API ---
-app.get('/api/health', (req, res) => { /* ... */ });
-app.get('/api', (req, res) => { /* ... */ });
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+app.get('/api', (req, res) => {
+  res.status(200).json({ message: 'API de Sistema Jireh funcionando' });
+});
 
 // Configurar rutas de la API
 app.use('/api/auth', authRutas);
@@ -69,13 +73,25 @@ app.use('/api/detalles_evaluacion', detalleEvaluacionRutas);
 app.use('/api/nominas', nominaRutas);
 app.use('/api/vacaciones', vacacionRutas);
 
-// --- Manejo de errores y rutas no encontradas ---
 app.use(rutaNoEncontrada);
 app.use(manejarErrores);
 
-// --- Función para iniciar el servidor ---
-const iniciarServidor = async () => { /* ... */ };
+const iniciarServidor = async () => {
+  try {
+    await probarConexion();
+    const port = process.env.PORT || 3001;
+    app.listen(port, () => {
+      logger.info(`Servidor escuchando en el puerto ${port}`);
+    });
+  } catch (error) {
+    logger.error('No se pudo iniciar el servidor:', error);
+    process.exit(1);
+  }
+};
 
-// ... resto del archivo ...
+
+if (require.main === module) {
+  iniciarServidor();
+}
 
 module.exports = app;

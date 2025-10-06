@@ -98,7 +98,7 @@ const login = async (req, res) => {
       });
       return res.status(401).json({ mensaje: 'Usuario inactivo o credenciales inválidas' });
     }
-
+    //Hasheando la contraseña
     const contrasenaValida = await bcrypt.compare(contrasena, usuario.contrasena_hash || '');
     
     if (!contrasenaValida) {

@@ -4,6 +4,17 @@ const { Puestos, Carreras, Auditoria, Usuarios } = require('../modelos');
 const logger = require('../utilidades/logger');
 
 /**
+ * Helper para encontrar un puesto por ID y verificar que esté activo.
+ * @param {string} id_puesto - El ID del puesto a buscar.
+ * @returns {Promise<Puestos|null>} El modelo del puesto o null si no se encuentra.
+ */
+const findPuestoActivoById = (id_puesto) => {
+    return Puestos.findOne({
+        where: { id_puesto, activo: true }
+    });
+};
+
+/**
  * Controlador para crear un nuevo puesto.
  */
 const crearPuesto = async (req, res) => {
@@ -62,14 +73,7 @@ const obtenerTodosPuestos = async (req, res) => {
 const obtenerPuestoPorId = async (req, res) => {
     try {
         const { id_puesto } = req.params;
-        const puesto = await Puestos.findByPk(id_puesto, {
-            include: [
-                { model: Carreras, as: 'carrera' },
-                { model: Usuarios, as: 'creador' },
-                { model: Usuarios, as: 'actualizador' }
-            ]
-        });
-
+        const puesto = await findPuestoActivoById(id_puesto);
         if (!puesto || !puesto.activo) {
             return res.status(404).json({ mensaje: 'Puesto no encontrado' });
         }
@@ -97,9 +101,9 @@ const actualizarPuesto = async (req, res) => {
         }
         
         const { id_puesto } = req.params;
-        const puestoAActualizar = await Puestos.findByPk(id_puesto);
+        const puestoAActualizar = await findPuestoActivoById(id_puesto);
 
-        if (!puestoAActualizar || !puestoAActualizar.activo) {
+        if (!puestoAActualizar) {
             return res.status(404).json({ mensaje: 'Puesto no encontrado' });
         }
 
@@ -126,9 +130,9 @@ const actualizarPuesto = async (req, res) => {
 const eliminarPuesto = async (req, res) => {
     try {
         const { id_puesto } = req.params;
-        const puestoAEliminar = await Puestos.findByPk(id_puesto);
+        const puestoAEliminar = await findPuestoActivoById(id_puesto);
 
-        if (!puestoAEliminar || !puestoAEliminar.activo) {
+        if (!puestoAEliminar) {
             return res.status(404).json({ mensaje: 'Puesto no encontrado' });
         }
 

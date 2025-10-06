@@ -44,7 +44,7 @@ const autenticarToken = async (req, res, next) => {
       roles: usuario.roles?.nombre_rol || 'Invitado'
     };
 
-    logger.info(`Usuario autenticado: ${usuario.nombre_usuario} (${req.usuario.rol})`);
+    logger.info(`Usuario autenticado: ${usuario.nombre_usuario} (${req.usuario.roles})`);
     next();
   } catch (error) {
     logger.error('Error en autenticación:', error.message);

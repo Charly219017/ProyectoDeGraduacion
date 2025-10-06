@@ -6,8 +6,7 @@
   "scripts": {
     "start": "node aplicacion.js",
     "dev": "nodemon aplicacion.js",
-    "test": "jest",
-    "start:mcp": "set API_KEY=sk-user-gtMsATUYVOGlUsGsfk4Qv1H3dVikTXJCHjNoewCauI_Xm501DSr_3lPp6JT9FTwBhryvbvDJTS1OIApVOmEjkzfmedl68WhH8sU6m_PRJjgdNdmtCGOZXKnh_75x7qqWcbk && npx @testsprite/testsprite-mcp@latest"
+    "test": "jest"
   },
   "keywords": [
     "crm",

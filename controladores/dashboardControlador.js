@@ -63,7 +63,7 @@ const obtenerResumen = async (req, res) => {
       fechaServidor: new Date().toISOString(),
       usuario: {
         nombre: req.usuario.nombre_usuario,
-        rol: req.usuario.rol
+        rol: req.usuario.roles
       }
     };
 
