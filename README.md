@@ -44,8 +44,8 @@ Backend del Sistema Jireh, un CRM de gestión de Recursos Humanos para escuelas 
    DB_PORT=5432
    DB_NAME=sistemaJireh
    DB_USER=postgres
-   DB_PASSWORD=crenedlr05
-   JWT_SECRET=sistema_jireh_jwt_secret_key_2025
+   DB_PASSWORD=tu_contraseña
+   JWT_SECRET=TuSecretoJWT
    JWT_EXPIRES_IN=24h
    LOG_LEVEL=info
    LOG_FILE=logs/app.log
