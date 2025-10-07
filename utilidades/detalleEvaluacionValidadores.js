@@ -3,8 +3,10 @@ const { body } = require('express-validator');
 
 const validarCreacionDetalleEvaluacion = [
     body('id_evaluacion')
+        .notEmpty().withMessage('El ID de la evaluación es requerido')
         .isInt({ gt: 0 }).withMessage('El ID de la evaluación debe ser un número entero positivo'),
     body('id_criterio')
+        .notEmpty().withMessage('El ID del criterio es requerido')
         .isInt({ gt: 0 }).withMessage('El ID del criterio debe ser un número entero positivo'),
     body('puntuacion')
         .optional({ nullable: true, checkFalsy: true })

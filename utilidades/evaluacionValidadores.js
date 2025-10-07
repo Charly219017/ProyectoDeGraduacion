@@ -3,9 +3,10 @@ const { body } = require('express-validator');
 
 const validarCreacionEvaluacion = [
     body('id_empleado')
-        .optional({ nullable: true, checkFalsy: true })
+        .notEmpty().withMessage('El ID del empleado es requerido')
         .isInt({ gt: 0 }).withMessage('El ID del empleado debe ser un número entero positivo'),
     body('fecha_evaluacion')
+        .notEmpty().withMessage('La fecha de evaluación es requerida')
         .isISO8601().toDate().withMessage('La fecha de evaluación debe ser una fecha válida'),
     body('evaluador')
         .optional({ nullable: true, checkFalsy: true })
