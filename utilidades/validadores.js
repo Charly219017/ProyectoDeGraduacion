@@ -36,10 +36,10 @@ const validarCreacionUsuario = [
  */
 const validarActualizacionUsuario = [
   body('nombre_usuario')
-    .optional()
+    .optional({ checkFalsy: true })
     .isLength({ min: 6 }).withMessage('El nombre de usuario debe tener al menos 6 caracteres'),
   body('correo')
-    .optional()
+    .optional({ checkFalsy: true })
     .isEmail().withMessage('El correo electrónico no es válido')
     .custom(async (value, { req }) => {
       const usuario = await Usuarios.findOne({ where: { correo: value } });
@@ -49,10 +49,10 @@ const validarActualizacionUsuario = [
       }
     }),
   body('contrasena')
-    .optional()
+    .optional({ checkFalsy: true })
     .isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres'),
   body('id_rol')
-    .optional()
+    .optional({ checkFalsy: true })
     .isInt({ gt: 0 }).withMessage('El ID de rol debe ser un número entero positivo'),
   body('activo')
     .optional()

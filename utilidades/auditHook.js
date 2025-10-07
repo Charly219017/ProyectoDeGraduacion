@@ -68,7 +68,10 @@ const auditHooks = {
     return registrarAuditoria(instancia, options, 'CREAR');
   },
   afterUpdate: (instancia, options) => {
-    return registrarAuditoria(instancia, options, 'ACTUALIZAR');
+    // Comprobar si es un borrado lógico
+    const isSoftDelete = instancia.changed('activo') && instancia.get('activo') === false;
+    const accion = isSoftDelete ? 'ELIMINAR' : 'ACTUALIZAR';
+    return registrarAuditoria(instancia, options, accion);
   },
   afterDestroy: (instancia, options) => {
     return registrarAuditoria(instancia, options, 'ELIMINAR');

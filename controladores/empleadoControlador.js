@@ -7,6 +7,11 @@ const logger = require('../utilidades/logger');
  * Controlador para crear un nuevo empleado.
  */
 const crearEmpleado = async (req, res) => {
+    logger.info('Usuario en crearEmpleado:', req.usuario);
+    if (!req.usuario || !req.usuario.id) {
+        logger.error('El ID del usuario para la auditoría está vacío en req.usuario.');
+        return res.status(400).json({ mensaje: 'El ID del usuario para la auditoría no puede estar vacío.' });
+    }
     try {
         const errores = validationResult(req);
         if (!errores.isEmpty()) {
@@ -19,7 +24,7 @@ const crearEmpleado = async (req, res) => {
         const nuevoEmpleado = await Empleados.create({
             ...req.body,
             creado_por: req.usuario.id
-        }, { usuario: req.usuario });
+        });
 
         logger.info(`Empleado creado exitosamente: ${nuevoEmpleado.nombre_completo} por ${req.usuario.nombre_usuario}`);
         res.status(201).json({
@@ -124,7 +129,7 @@ const actualizarEmpleado = async (req, res) => {
         await empleadoAActualizar.update({
             ...req.body,
             actualizado_por: req.usuario.id
-        }, { usuario: req.usuario });
+        });
 
         logger.info(`Empleado con ID ${id_empleado} actualizado por ${req.usuario.nombre_usuario}`);
         res.json({
@@ -154,7 +159,7 @@ const eliminarEmpleado = async (req, res) => {
         await empleadoAEliminar.update({ 
             activo: false,
             actualizado_por: req.usuario.id
-        }, { usuario: req.usuario });
+        });
 
         logger.info(`Empleado con ID ${id_empleado} eliminado por ${req.usuario.nombre_usuario}`);
         res.json({ mensaje: 'Empleado eliminado exitosamente' });

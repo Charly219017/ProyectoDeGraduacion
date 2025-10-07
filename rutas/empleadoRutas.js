@@ -6,23 +6,19 @@ const { autenticarToken, soloAdministradores } = require('../middlewares/authMid
 
 const router = express.Router();
 
-// Todas las rutas de empleados requieren autenticación y permisos de administrador
-router.use(autenticarToken);
-router.use(soloAdministradores);
-
 // Ruta para obtener todos los empleados
-router.get('/obtenerempleados', empleadoControlador.obtenerTodosEmpleados);
+router.get('/obtenerempleados', autenticarToken, soloAdministradores, empleadoControlador.obtenerTodosEmpleados);
 
 // Ruta para crear un nuevo empleado
-router.post('/crearempleado', validarCreacionEmpleado, empleadoControlador.crearEmpleado);
+router.post('/crearempleado', autenticarToken, soloAdministradores, validarCreacionEmpleado, empleadoControlador.crearEmpleado);
 
 // Ruta para obtener un empleado por su ID
-router.get('/obtener/:id_empleado', empleadoControlador.obtenerEmpleadoPorId);
+router.get('/obtener/:id_empleado', autenticarToken, soloAdministradores, empleadoControlador.obtenerEmpleadoPorId);
 
 // Ruta para actualizar un empleado por su ID
-router.put('/actualizar/:id_empleado', validarActualizacionEmpleado, empleadoControlador.actualizarEmpleado);
+router.put('/actualizar/:id_empleado', autenticarToken, soloAdministradores, validarActualizacionEmpleado, empleadoControlador.actualizarEmpleado);
 
 // Ruta para eliminar un empleado por su ID
-router.delete('/eliminar/:id_empleado', empleadoControlador.eliminarEmpleado);
+router.delete('/eliminar/:id_empleado', autenticarToken, soloAdministradores, empleadoControlador.eliminarEmpleado);
 
 module.exports = router;

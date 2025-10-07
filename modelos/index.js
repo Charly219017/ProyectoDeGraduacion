@@ -53,14 +53,7 @@ Object.keys(db).forEach(modelName => {
   }
 });
 
-// Aplicar hooks de auditoría a todos los modelos excepto Auditoria
-Object.values(sequelize.models).forEach(model => {
-  if (model.name !== 'Auditoria') { // Prevenir bucles infinitos
-    for (const hookName in auditHooks) {
-      model.addHook(hookName, auditHooks[hookName]);
-    }
-  }
-});
+
 
 // Función para probar la conexión
 const probarConexion = async () => {

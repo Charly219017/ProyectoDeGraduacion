@@ -65,18 +65,8 @@ const crearUsuario = async (req, res) => {
       contrasena_hash,
       id_rol,
       creado_por: req.usuario.id
-    });
-    
-    await Auditoria.create({
-      tabla_afectada: 'usuarios',
-      id_registro_text: String(nuevoUsuario.id_usuario),
-      accion: 'CREAR_USUARIO',
-      usuario: req.usuario.id,
-      descripcion: JSON.stringify({ 
-        mensaje: `Creación de usuario: ${nuevoUsuario.nombre_usuario}`,
-        nuevo_usuario_id: nuevoUsuario.id_usuario
-      })
-    });
+    }, { usuario: req.usuario });
+
 
     logger.info(`Usuario creado exitosamente: ${nuevoUsuario.nombre_usuario} por ${req.usuario.nombre_usuario}`);
     res.status(201).json({
@@ -124,20 +114,9 @@ const actualizarUsuario = async (req, res) => {
     const valorAnterior = { ...usuarioAActualizar.get({ plain: true }) };
     delete valorAnterior.contrasena_hash;
 
-    await usuarioAActualizar.update(datosActualizados);
+    await usuarioAActualizar.update(datosActualizados, { usuario: req.usuario });
 
-    const datosParaAuditoria = { ...req.body };
-    delete datosParaAuditoria.contrasena;
 
-    await Auditoria.create({
-      tabla_afectada: 'usuarios',
-      id_registro_text: String(id_usuario),
-      accion: 'ACTUALIZAR_USUARIO',
-      usuario: req.usuario.id,
-      valor_anterior: JSON.stringify(valorAnterior),
-      valor_nuevo: JSON.stringify(datosParaAuditoria),
-      descripcion: JSON.stringify({ mensaje: `Actualización de usuario: ${usuarioAActualizar.nombre_usuario}` })
-    });
 
     logger.info(`Usuario actualizado exitosamente: ${usuarioAActualizar.nombre_usuario} por ${req.usuario.nombre_usuario}`);
     res.json({
@@ -165,18 +144,9 @@ const eliminarUsuario = async (req, res) => {
       activo: false,
       actualizado_por: req.usuario.id,
       fecha_actualizacion: new Date()
-    });
+    }, { usuario: req.usuario });
 
-    await Auditoria.create({
-      tabla_afectada: 'usuarios',
-      id_registro_text: String(usuarioAEliminar.id_usuario),
-      accion: 'ELIMINAR_USUARIO (LÓGICO)',
-      usuario: req.usuario.id,
-      campo_modificado: 'activo',
-      valor_anterior: 'true',
-      valor_nuevo: 'false',
-      descripcion: JSON.stringify({ mensaje: `Desactivación de usuario: ${usuarioAEliminar.nombre_usuario}` })
-    });
+
 
     logger.info(`Usuario eliminado exitosamente: ${usuarioAEliminar.nombre_usuario} por ${req.usuario.nombre_usuario}`);
     res.json({ mensaje: 'Usuario desactivado exitosamente' });

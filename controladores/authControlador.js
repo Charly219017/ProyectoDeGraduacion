@@ -8,24 +8,7 @@ const { Usuarios, Roles, Auditoria } = require('../modelos');
 const logger = require('../utilidades/logger');
 const config = require('../configuracion/configuracion');
 
-/**
- * Genera un token JWT para el usuario.
- * @param {Object} usuario - Objeto de usuario con id, nombre y rol.
- * @returns {string} Token JWT.
- */
-const generarToken = (usuario) => {
-  return jwt.sign(
-    { 
-      id: usuario.id_usuario, 
-      nombre: usuario.nombre_usuario, 
-      rol: usuario.roles?.nombre_rol 
-    },
-    config.jwt.secret,
-    {
-      expiresIn: config.jwt.expiracion,
-    }
-  );
-};
+const { generarToken } = require('../utilidades/jwt');
 
 /**
  * Controlador para el inicio de sesión de usuarios.
