@@ -11,6 +11,7 @@ const validarCreacionDetalleEvaluacion = [
     body('puntuacion')
         .optional({ nullable: true, checkFalsy: true })
         .isDecimal().withMessage('La puntuación debe ser un número decimal')
+        .isFloat({ min: 0, max: 100 }).withMessage('La puntuación debe estar entre 0 y 100')
 ];
 
 const validarActualizacionDetalleEvaluacion = [
@@ -23,6 +24,7 @@ const validarActualizacionDetalleEvaluacion = [
     body('puntuacion')
         .optional()
         .isDecimal().withMessage('La puntuación debe ser un número decimal')
+        .isFloat({ min: 0, max: 100 }).withMessage('La puntuación debe estar entre 0 y 100')
 ];
 
 module.exports = {

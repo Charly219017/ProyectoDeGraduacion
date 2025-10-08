@@ -9,11 +9,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     id_evaluacion: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
     },
     id_criterio: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
     },
     puntuacion: {
       type: DataTypes.DECIMAL(5, 2),
