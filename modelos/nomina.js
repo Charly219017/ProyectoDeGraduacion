@@ -9,11 +9,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     id_empleado: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
     },
     mes: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
       validate: {
         min: 1,
         max: 12
@@ -21,66 +21,92 @@ module.exports = (sequelize, DataTypes) => {
     },
     anio: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
       validate: {
         min: 2000
       }
     },
-    sueldo_bruto: {
+
+    // DATOS DE ENTRADA PARA EL CÁLCULO
+    salario_base: {
       type: DataTypes.DECIMAL(10, 2),
-      allowNull: true,
-      validate: {
-        min: 0
-      }
+      allowNull: false,
+      defaultValue: 0.00
     },
-    bonificaciones: {
+    horas_extras: {
+      type: DataTypes.DECIMAL(5, 2),
+      defaultValue: 0.00
+    },
+    comisiones: {
       type: DataTypes.DECIMAL(10, 2),
-      allowNull: true,
-      defaultValue: 0,
-      validate: {
-        min: 0
-      }
+      defaultValue: 0.00
     },
-    descuentos: {
+    isr: {
       type: DataTypes.DECIMAL(10, 2),
-      allowNull: true,
-      defaultValue: 0,
-      validate: {
-        min: 0
-      }
+      defaultValue: 0.00
     },
-    sueldo_neto: {
+    otros_descuentos: {
       type: DataTypes.DECIMAL(10, 2),
-      allowNull: true,
-      validate: {
-        min: 0
-      }
+      defaultValue: 0.00
     },
+
+    // VALORES CALCULADOS Y ALMACENADOS
+    bonificacion_decreto: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0.00
+    },
+    pago_horas_extras: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0.00
+    },
+    total_ingresos: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0.00
+    },
+    deduccion_igss: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0.00
+    },
+    total_descuentos: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0.00
+    },
+    sueldo_liquido: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0.00
+    },
+
+    // CAMPOS DE AUDITORÍA
     fecha_generacion: {
       type: DataTypes.DATE,
-      allowNull: true,
       defaultValue: DataTypes.NOW
     },
     creado_por: {
-      type: DataTypes.INTEGER,
-      allowNull: true
+      type: DataTypes.INTEGER
     },
     actualizado_por: {
-      type: DataTypes.INTEGER,
-      allowNull: true
+      type: DataTypes.INTEGER
     },
     fecha_actualizacion: {
-      type: DataTypes.DATE,
-      allowNull: true
+      type: DataTypes.DATE
     },
     activo: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true,
-      allowNull: true
+      defaultValue: true
     }
   }, {
     tableName: 'nomina',
     timestamps: false,
+     indexes: [
+      {
+        name: 'idx_nomina_empleado', // Nombre del índice
+        fields: ['id_empleado']     // Columna indexada
+      },
+      {
+        name: 'idx_nomina_periodo',  // Nombre del índice
+        fields: ['mes', 'anio']      // Columnas indexadas (índice compuesto)
+      }
+    ]
 
   });
 

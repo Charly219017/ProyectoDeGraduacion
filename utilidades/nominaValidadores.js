@@ -1,49 +1,70 @@
 // carpeta: backend/utilidades/nominaValidadores.js
 const { body } = require('express-validator');
 
+// Reglas de validación para la creación de un registro de nómina
 const validarCreacionNomina = [
     body('id_empleado')
-        .isInt({ gt: 0 }).withMessage('El ID del empleado debe ser un número entero positivo'),
+        .notEmpty().withMessage('El ID del empleado es requerido.')
+        .isInt({ gt: 0 }).withMessage('El ID del empleado debe ser un número entero positivo.'),
     body('mes')
-        .isInt({ min: 1, max: 12 }).withMessage('El mes debe ser un número entre 1 y 12'),
+        .notEmpty().withMessage('El mes es requerido.')
+        .isInt({ min: 1, max: 12 }).withMessage('El mes debe ser un número entre 1 y 12.'),
     body('anio')
-        .isInt({ min: 2000 }).withMessage('El año debe ser 2000 o superior'),
-    body('sueldo_bruto')
-        .optional({ nullable: true, checkFalsy: true })
-        .isDecimal().withMessage('El sueldo bruto debe ser un número decimal'),
-    body('bonificaciones')
-        .optional({ nullable: true, checkFalsy: true })
-        .isDecimal().withMessage('Las bonificaciones deben ser un número decimal'),
-    body('descuentos')
-        .optional({ nullable: true, checkFalsy: true })
-        .isDecimal().withMessage('Los descuentos deben ser un número decimal'),
-    body('sueldo_neto')
-        .optional({ nullable: true, checkFalsy: true })
-        .isDecimal().withMessage('El sueldo neto debe ser un número decimal')
+        .notEmpty().withMessage('El año es requerido.')
+        .isInt({ min: 2000 }).withMessage('El año debe ser 2000 o superior.'),
+    body('salario_base')
+        .notEmpty().withMessage('El salario base es requerido.')
+        .isDecimal({ decimal_digits: '1,2' }).withMessage('El salario base debe ser un número decimal con hasta 2 decimales.')
+        .toFloat(),
+    body('horas_extras')
+        .optional()
+        .isDecimal({ decimal_digits: '1,2' }).withMessage('Las horas extras deben ser un número decimal.')
+        .toFloat(),
+    body('comisiones')
+        .optional()
+        .isDecimal({ decimal_digits: '1,2' }).withMessage('Las comisiones deben ser un número decimal.')
+        .toFloat(),
+    body('isr')
+        .optional()
+        .isDecimal({ decimal_digits: '1,2' }).withMessage('El ISR debe ser un número decimal.')
+        .toFloat(),
+    body('otros_descuentos')
+        .optional()
+        .isDecimal({ decimal_digits: '1,2' }).withMessage('El campo "otros descuentos" debe ser un número decimal.')
+        .toFloat()
 ];
 
+// Reglas de validación para la actualización de un registro de nómina
 const validarActualizacionNomina = [
     body('id_empleado')
         .optional()
-        .isInt({ gt: 0 }).withMessage('El ID del empleado debe ser un número entero positivo'),
+        .isInt({ gt: 0 }).withMessage('El ID del empleado debe ser un número entero positivo.'),
     body('mes')
         .optional()
-        .isInt({ min: 1, max: 12 }).withMessage('El mes debe ser un número entre 1 y 12'),
+        .isInt({ min: 1, max: 12 }).withMessage('El mes debe ser un número entre 1 y 12.'),
     body('anio')
         .optional()
-        .isInt({ min: 2000 }).withMessage('El año debe ser 2000 o superior'),
-    body('sueldo_bruto')
+        .isInt({ min: 2000 }).withMessage('El año debe ser 2000 o superior.'),
+    body('salario_base')
         .optional()
-        .isDecimal().withMessage('El sueldo bruto debe ser un número decimal'),
-    body('bonificaciones')
+        .isDecimal({ decimal_digits: '1,2' }).withMessage('El salario base debe ser un número decimal.')
+        .toFloat(),
+    body('horas_extras')
         .optional()
-        .isDecimal().withMessage('Las bonificaciones deben ser un número decimal'),
-    body('descuentos')
+        .isDecimal({ decimal_digits: '1,2' }).withMessage('Las horas extras deben ser un número decimal.')
+        .toFloat(),
+    body('comisiones')
         .optional()
-        .isDecimal().withMessage('Los descuentos deben ser un número decimal'),
-    body('sueldo_neto')
+        .isDecimal({ decimal_digits: '1,2' }).withMessage('Las comisiones deben ser un número decimal.')
+        .toFloat(),
+    body('isr')
         .optional()
-        .isDecimal().withMessage('El sueldo neto debe ser un número decimal')
+        .isDecimal({ decimal_digits: '1,2' }).withMessage('El ISR debe ser un número decimal.')
+        .toFloat(),
+    body('otros_descuentos')
+        .optional()
+        .isDecimal({ decimal_digits: '1,2' }).withMessage('El campo "otros descuentos" debe ser un número decimal.')
+        .toFloat()
 ];
 
 module.exports = {

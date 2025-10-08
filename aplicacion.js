@@ -70,7 +70,7 @@ app.use('/api/aplicaciones', aplicacionRutas);
 app.use('/api/criterios', criterioRutas);
 app.use('/api/evaluaciones', evaluacionRutas);
 app.use('/api/detalles_evaluacion', detalleEvaluacionRutas);
-app.use('/api/nominas', nominaRutas);
+app.use('/api/nomina', nominaRutas);
 app.use('/api/vacaciones', vacacionRutas);
 
 app.use(rutaNoEncontrada);

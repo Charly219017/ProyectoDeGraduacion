@@ -167,22 +167,39 @@ CREATE TABLE public.detalle_evaluacion (
     CONSTRAINT uc_evaluacion_criterio UNIQUE (id_evaluacion, id_criterio)
 );
 
--- Nómina
+-- Definición final de la tabla de Nómina
 CREATE TABLE public.nomina (
     id_nomina serial PRIMARY KEY,
     id_empleado integer REFERENCES public.empleados(id_empleado),
-    mes integer,
-    anio integer,
-    sueldo_bruto numeric(10,2),
-    bonificaciones numeric(10,2),
-    descuentos numeric(10,2),
-    sueldo_neto numeric(10,2),
+    mes integer NOT NULL,
+    anio integer NOT NULL,
+
+    -- DATOS DE ENTRADA PARA EL CÁLCULO
+    salario_base numeric(10, 2) DEFAULT 0.00,
+    horas_extras numeric(5, 2) DEFAULT 0.00,
+    comisiones numeric(10, 2) DEFAULT 0.00,
+    isr numeric(10, 2) DEFAULT 0.00,
+    otros_descuentos numeric(10, 2) DEFAULT 0.00,
+
+    -- VALORES CALCULADOS Y ALMACENADOS
+    bonificacion_decreto numeric(10, 2) DEFAULT 0.00,
+    pago_horas_extras numeric(10, 2) DEFAULT 0.00,
+    total_ingresos numeric(10, 2) DEFAULT 0.00,
+    deduccion_igss numeric(10, 2) DEFAULT 0.00,
+    total_descuentos numeric(10, 2) DEFAULT 0.00,
+    sueldo_liquido numeric(10, 2) DEFAULT 0.00,
+
+    -- CAMPOS DE AUDITORÍA
     fecha_generacion timestamp DEFAULT CURRENT_TIMESTAMP,
     creado_por integer REFERENCES public.usuarios(id_usuario),
     actualizado_por integer REFERENCES public.usuarios(id_usuario),
     fecha_actualizacion timestamp,
     activo boolean DEFAULT true
 );
+
+-- Índices para mejorar el rendimiento de las búsquedas
+CREATE INDEX idx_nomina_empleado ON public.nomina(id_empleado);
+CREATE INDEX idx_nomina_periodo ON public.nomina(mes, anio);
 
 -- Vacaciones
 CREATE TABLE public.vacaciones (
