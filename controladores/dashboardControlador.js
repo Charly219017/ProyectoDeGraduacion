@@ -10,29 +10,18 @@ const obtenerEstadisticas = async (req, res) => {
     // Ejecutar todas las consultas en paralelo para mejorar el rendimiento
     const [
       empleadosActivos,
-      totalEmpleados,
       vacacionesAprobadas,
-      vacacionesPendientes,
-      // evaluacionesPendientes, // Se comenta porque el modelo/tabla Evaluaciones no existe o no tiene la columna 'estado'
+      evaluacionesPendientes,
     ] = await Promise.all([
       Empleados.count({ where: { activo: true } }),
-      Empleados.count(),
-      Vacaciones.count({ where: { estado: 'Aprobada' } }),
-      Vacaciones.count({ where: { estado: 'Pendiente' } }),
-      // Evaluaciones.count({ where: { estado: 'Pendiente' } }), // Se comenta porque el modelo/tabla Evaluaciones no existe o no tiene la columna 'estado'
+      Vacaciones.count({ where: { estado: 'Aprobada', activo: true } }),
+      Evaluaciones.count({ where: { puntuacion_total: null, activo: true } })
     ]);
-
-    // Calcular porcentajes
-    const porcentajeActivos = totalEmpleados > 0 ? 
-      Math.round((empleadosActivos / totalEmpleados) * 100) : 0;
 
     const estadisticas = {
       empleadosActivos,
       vacacionesAprobadas,
-      evaluacionesPendientes: 0, // Se establece en 0 temporalmente
-      totalEmpleados,
-      vacacionesPendientes,
-      porcentajeActivos,
+      evaluacionesPendientes,
       ultimaActualizacion: new Date().toISOString()
     };
 

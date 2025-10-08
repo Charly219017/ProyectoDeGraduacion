@@ -170,6 +170,9 @@ const eliminarEmpleado = async (req, res) => {
     }
 };
 
+/**
+ * Controlador para contar el número total de empleados activos.
+ */
 module.exports = {
     crearEmpleado,
     obtenerTodosEmpleados,
