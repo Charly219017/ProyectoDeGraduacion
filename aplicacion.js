@@ -34,6 +34,7 @@ const evaluacionRutas = require('./rutas/evaluacionRutas');
 const detalleEvaluacionRutas = require('./rutas/detalleEvaluacionRutas');
 const nominaRutas = require('./rutas/nominaRutas');
 const vacacionRutas = require('./rutas/vacacionRutas');
+const reporteRutas = require('./rutas/reporteRutas');
 
 // Crear aplicación Express
 const app = express();
@@ -72,6 +73,7 @@ app.use('/api/evaluaciones', evaluacionRutas);
 app.use('/api/detalles_evaluacion', detalleEvaluacionRutas);
 app.use('/api/nomina', nominaRutas);
 app.use('/api/vacaciones', vacacionRutas);
+app.use('/api/reportes', reporteRutas);
 
 app.use(rutaNoEncontrada);
 app.use(manejarErrores);
