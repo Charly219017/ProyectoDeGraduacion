@@ -17,4 +17,8 @@ router.get('/:id_nomina', nominaControlador.obtenerNominaPorId);
 router.put('/:id_nomina', validarActualizacionNomina, nominaControlador.actualizarNomina);
 router.delete('/:id_nomina', nominaControlador.eliminarNomina);
 
+// Rutas para generar PDFs de Nómina
+router.get('/:id_nomina/imprimir', nominaControlador.imprimirNominaPorId);
+router.get('/lote/imprimir', nominaControlador.imprimirNominasPorLote);
+
 module.exports = router;

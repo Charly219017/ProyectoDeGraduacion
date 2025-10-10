@@ -183,10 +183,69 @@ const eliminarNomina = async (req, res) => {
     }
 };
 
+const { generarPdfNomina } = require('../utilidades/generadorPdfNomina');
+const { Puestos } = require('../modelos');
+
+/**
+ * Controlador para generar y enviar un recibo de nómina en PDF.
+ */
+const imprimirNominaPorId = async (req, res) => {
+    try {
+        const { id_nomina } = req.params;
+
+        // Medida de seguridad: Verificar que el usuario sea Administrador
+        if (req.usuario.roles !== 'Administrador') {
+            logger.warn(`Intento de acceso no autorizado a la nómina ID ${id_nomina} por el usuario ${req.usuario.nombre_usuario}. Se requiere rol de Administrador.`);
+            return res.status(403).json({ mensaje: 'Acceso prohibido. Permiso denegado.' });
+        }
+
+        const nomina = await Nomina.findByPk(id_nomina, {
+            include: [
+                {
+                    model: Empleados,
+                    as: 'empleado',
+                    include: [{ model: Puestos, as: 'puesto' }]
+                },
+                { model: Usuarios, as: 'creador' },
+                { model: Usuarios, as: 'actualizador' }
+            ]
+        });
+
+        if (!nomina || !nomina.activo) {
+            return res.status(404).json({ mensaje: 'Registro de nómina no encontrado' });
+        }
+
+        logger.info(`Generando PDF para nómina con ID ${id_nomina} por ${req.usuario.nombre_usuario}`);
+        
+        // La función generadora se encarga de la respuesta HTTP
+        generarPdfNomina(nomina, res);
+
+    } catch (error) {
+        logger.error(`Error al generar PDF de nómina por ID ${req.params.id_nomina}:`, error);
+        res.status(500).json({ mensaje: 'Error interno del servidor al generar el PDF' });
+    }
+};
+
+/**
+ * Controlador para generar y enviar un PDF con múltiples recibos de nómina (por lote).
+ * IMPLEMENTACIÓN PENDIENTE
+ */
+const imprimirNominasPorLote = async (req, res) => {
+    // TODO: Implementar la lógica para la generación por lotes.
+    // 1. Recibir parámetros de filtrado (mes, año, departamento, etc.) desde req.query.
+    // 2. Buscar todas las nóminas que coincidan con los filtros.
+    // 3. Crear un único PDF con una página (o más) por cada recibo de nómina.
+    // 4. Enviar el PDF como respuesta.
+    res.status(501).json({ mensaje: 'Funcionalidad de impresión por lote aún no implementada.' });
+};
+
+
 module.exports = {
     crearNomina,
     obtenerTodasNominas,
     obtenerNominaPorId,
     actualizarNomina,
-    eliminarNomina
+    eliminarNomina,
+    imprimirNominaPorId,
+    imprimirNominasPorLote
 };

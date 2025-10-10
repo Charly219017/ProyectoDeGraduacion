@@ -1,4 +1,5 @@
-const { Empleado, Puesto } = require('../modelos');
+
+const { Empleados, Puestos, Aplicaciones, Evaluaciones, Nomina } = require('../modelos');
 const { Op } = require('sequelize');
 const csvWriter = require('csv-writer').createObjectCsvWriter;
 const path = require('path');
@@ -8,16 +9,18 @@ const path = require('path');
 // @acceso  Privado
 exports.obtenerEstadisticasEmpleados = async (req, res) => {
   try {
-    const totalEmpleados = await Empleado.count();
-    const empleadosPorPuesto = await Empleado.findAll({
+    const totalEmpleados = await Empleados.count({ where: { activo: true } });
+    const empleadosPorPuesto = await Empleados.findAll({
+        where: { activo: true },
         attributes: [
-          [Empleado.sequelize.fn('COUNT', Empleado.sequelize.col('id_empleado')), 'cantidad']
+          [Empleados.sequelize.fn('COUNT', Empleados.sequelize.col('id_empleado')), 'cantidad']
         ],
         include: [{
-          model: Puesto,
+          model: Puestos,
+          as: 'puesto',
           attributes: ['nombre_puesto']
         }],
-        group: ['Puesto.id_puesto', 'Puesto.nombre_puesto']
+        group: ['puesto.id_puesto', 'puesto.nombre_puesto']
       });
 
     res.status(200).json({
@@ -38,9 +41,9 @@ exports.obtenerEstadisticasEmpleados = async (req, res) => {
 // @acceso  Privado
 exports.exportarEmpleadosCSV = async (req, res) => {
   try {
-    const empleados = await Empleado.findAll({
+    const empleados = await Empleados.findAll({
       include: [
-        { model: Puesto, attributes: ['nombre_puesto'] }
+        { model: Puestos, as: 'puesto', attributes: ['nombre_puesto'] }
       ],
       raw: true,
       nest: true
@@ -52,34 +55,106 @@ exports.exportarEmpleadosCSV = async (req, res) => {
       path: filePath,
       header: [
         { id: 'id_empleado', title: 'ID' },
-        { id: 'nombre', title: 'Nombre' },
-        { id: 'apellido', title: 'Apellido' },
-        { id: 'cedula', title: 'Cédula' },
+        { id: 'nombre_completo', title: 'Nombre Completo' },
+        { id: 'dpi', title: 'DPI' },
         { id: 'telefono', title: 'Teléfono' },
-        { id: 'correo_electronico', title: 'Email' },
+        { id: 'correo_personal', title: 'Email' },
         { id: 'direccion', title: 'Dirección' },
         { id: 'fecha_nacimiento', title: 'Fecha de Nacimiento' },
-        { id: 'Puesto.nombre_puesto', title: 'Puesto' }
+        { id: 'puesto.nombre_puesto', title: 'Puesto' }
       ]
     });
 
-    const records = empleados.map(emp => ({
-      ...emp,
-      'Puesto.nombre_puesto': emp.Puesto.nombre_puesto
-    }));
-
-    await writer.writeRecords(records);
+    await writer.writeRecords(empleados);
     
     res.download(filePath, 'reporte_empleados.csv', (err) => {
       if (err) {
         console.error(`Error al descargar el archivo: ${err.message}`);
       }
-      // Opcional: eliminar el archivo después de la descarga
-      // fs.unlinkSync(filePath);
     });
 
   } catch (error) {
     console.error(`Error al exportar empleados a CSV: ${error.message}`);
+    res.status(500).json({ success: false, error: 'Error del servidor' });
+  }
+};
+
+// @desc    Obtener estado de los candidatos
+// @ruta    GET /api/reportes/estado-candidatos
+// @acceso  Privado
+exports.obtenerEstadoCandidatos = async (req, res) => {
+  try {
+    const estadoCandidatos = await Aplicaciones.findAll({
+      attributes: [
+        'estado_aplicacion',
+        [Aplicaciones.sequelize.fn('COUNT', Aplicaciones.sequelize.col('id_aplicacion')), 'cantidad']
+      ],
+      group: ['estado_aplicacion']
+    });
+
+    res.status(200).json({
+      success: true,
+      data: estadoCandidatos
+    });
+  } catch (error) {
+    console.error(`Error al obtener estado de candidatos: ${error.message}`);
+    res.status(500).json({ success: false, error: 'Error del servidor' });
+  }
+};
+
+// @desc    Obtener promedio de desempeño anual
+// @ruta    GET /api/reportes/promedio-desempeno
+// @acceso  Privado
+exports.obtenerPromedioDesempeno = async (req, res) => {
+  try {
+    const promedioDesempeno = await Evaluaciones.findAll({
+      attributes: [
+        [Evaluaciones.sequelize.fn('AVG', Evaluaciones.sequelize.col('puntuacion_total')), 'promedio_puntuacion']
+      ],
+      include: [{
+        model: Empleados,
+        as: 'empleado',
+        attributes: [],
+        include: [{
+          model: Puestos,
+          as: 'puesto',
+          attributes: ['nombre_puesto']
+        }]
+      }],
+      group: ['empleado.puesto.nombre_puesto']
+    });
+
+    res.status(200).json({
+      success: true,
+      data: promedioDesempeno
+    });
+  } catch (error) {
+    console.error(`Error al obtener promedio de desempeño: ${error.message}`);
+    res.status(500).json({ success: false, error: 'Error del servidor' });
+  }
+};
+
+// @desc    Obtener total de sueldos por mes
+// @ruta    GET /api/reportes/total-sueldos-mes
+// @acceso  Privado
+exports.obtenerTotalSueldosPorMes = async (req, res) => {
+  try {
+    const totalSueldos = await Nomina.findAll({
+      attributes: [
+        'anio',
+        'mes',
+        [Nomina.sequelize.fn('SUM', Nomina.sequelize.col('sueldo_liquido')), 'total_sueldos']
+      ],
+      group: ['anio', 'mes'],
+      order: [['anio', 'DESC'], ['mes', 'DESC']]
+    });
+
+    res.status(200).json({
+      success: true,
+      data: totalSueldos
+    });
+  } catch (error) {
+    console.error(`Error al obtener total de sueldos por mes: ${error.message}`);
     res.status(500).json({ success: false, error: 'Error del servidor' });
   }
 };
