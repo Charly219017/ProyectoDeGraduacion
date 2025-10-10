@@ -183,7 +183,7 @@ const eliminarNomina = async (req, res) => {
     }
 };
 
-const { generarPdfNomina } = require('../utilidades/generadorPdfNomina');
+const { generarPdfNomina, dibujarReciboEnPagina } = require('../utilidades/generadorPdfNomina');
 const { Puestos } = require('../modelos');
 
 /**
@@ -227,16 +227,126 @@ const imprimirNominaPorId = async (req, res) => {
 };
 
 /**
- * Controlador para generar y enviar un PDF con múltiples recibos de nómina (por lote).
- * IMPLEMENTACIÓN PENDIENTE
+ * Controlador para generar y enviar un PDF con múltiples recibos de nómina por lote.
  */
 const imprimirNominasPorLote = async (req, res) => {
-    // TODO: Implementar la lógica para la generación por lotes.
-    // 1. Recibir parámetros de filtrado (mes, año, departamento, etc.) desde req.query.
-    // 2. Buscar todas las nóminas que coincidan con los filtros.
-    // 3. Crear un único PDF con una página (o más) por cada recibo de nómina.
-    // 4. Enviar el PDF como respuesta.
-    res.status(501).json({ mensaje: 'Funcionalidad de impresión por lote aún no implementada.' });
+    try {
+        const { mes, anio } = req.query;
+
+        if (!mes || !anio) {
+            return res.status(400).json({ mensaje: 'Los parámetros "mes" y "anio" son obligatorios.' });
+        }
+
+        const nominas = await Nomina.findAll({
+            where: { mes, anio, activo: true },
+            include: [
+                {
+                    model: Empleados,
+                    as: 'empleado',
+                    include: [{ model: Puestos, as: 'puesto' }]
+                }
+            ],
+            order: [['id_empleado', 'ASC']]
+        });
+
+        if (nominas.length === 0) {
+            return res.status(404).json({ mensaje: 'No se encontraron registros de nómina para el período especificado.' });
+        }
+
+        logger.info(`Generando PDF por lote para ${mes}/${anio} por ${req.usuario.nombre_usuario}`);
+
+        const PDFDocument = require('pdfkit');
+        const doc = new PDFDocument({ margin: 50, autoFirstPage: false });
+
+        const nombreArchivo = `Recibos_Lote_${mes}_${anio}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${nombreArchivo}"`);
+        doc.pipe(res);
+
+        nominas.forEach((nomina) => {
+            doc.addPage();
+            
+            // --- INICIO DEL DISEÑO DEL RECIBO (Copiado y adaptado para el lote) ---
+            doc.fontSize(20).font('Helvetica-Bold').text('Recibo de Pago de Nómina', { align: 'center' });
+            doc.moveDown();
+            doc.fontSize(12).font('Helvetica').text(`Fecha de Emisión: ${new Date(nomina.fecha_generacion).toLocaleDateString('es-GT')}`, { align: 'right' });
+            doc.text(`Período: ${String(nomina.mes).padStart(2, '0')}/${nomina.anio}`, { align: 'right' });
+            doc.moveDown(1);
+
+            doc.fontSize(14).font('Helvetica-Bold').text('Información del Empleado');
+            doc.rect(doc.x, doc.y, 510, 80).stroke();
+            doc.moveDown(0.5);
+            doc.fontSize(12).font('Helvetica');
+            
+            const xInfo = doc.x + 15;
+            const yInfoStart = doc.y;
+
+            doc.text(`Nombre:`, xInfo, yInfoStart);
+            doc.font('Helvetica-Bold').text(`${nomina.empleado.nombre_completo}`, 150, yInfoStart);
+            doc.font('Helvetica').text(`DPI:`, xInfo, yInfoStart + 20);
+            doc.text(`${nomina.empleado.dpi || 'N/A'}`, 150, yInfoStart + 20);
+            doc.text(`Puesto:`, xInfo, yInfoStart + 40);
+            doc.text(`${nomina.empleado.puesto ? nomina.empleado.puesto.nombre_puesto : 'N/A'}`, 150, yInfoStart + 40);
+            doc.moveDown(3);
+
+            const tableTop = doc.y + 10;
+            const itemX = 60;
+            const amountX = 450;
+            const drawLine = (y) => doc.moveTo(50, y).lineTo(560, y).stroke();
+            const addRow = (item, amount) => {
+                const y = doc.y;
+                doc.text(item, itemX, y);
+                doc.text(parseFloat(amount).toFixed(2), amountX, y, { width: 100, align: 'right' });
+                doc.moveDown();
+            };
+
+            doc.fontSize(14).font('Helvetica-Bold').text('Ingresos', itemX, tableTop);
+            doc.text('Monto (Q)', amountX, tableTop, { width: 100, align: 'right' });
+            doc.moveDown();
+            drawLine(doc.y);
+            doc.moveDown(0.5);
+            doc.fontSize(12).font('Helvetica');
+            addRow('Salario Base', nomina.salario_base);
+            addRow('Bonificación Decreto 37-2001', nomina.bonificacion_decreto);
+            if (parseFloat(nomina.pago_horas_extras) > 0) addRow('Pago Horas Extras', nomina.pago_horas_extras);
+            if (parseFloat(nomina.comisiones) > 0) addRow('Comisiones', nomina.comisiones);
+            doc.moveDown();
+            doc.font('Helvetica-Bold');
+            addRow('Total Ingresos', nomina.total_ingresos);
+            doc.moveDown(2);
+
+            doc.fontSize(14).font('Helvetica-Bold').text('Deducciones', itemX, doc.y);
+            doc.moveDown();
+            drawLine(doc.y);
+            doc.moveDown(0.5);
+            doc.fontSize(12).font('Helvetica');
+            addRow('Cuota IGSS', nomina.deduccion_igss);
+            if (parseFloat(nomina.isr) > 0) addRow('Retención ISR', nomina.isr);
+            if (parseFloat(nomina.otros_descuentos) > 0) addRow('Otros Descuentos', nomina.otros_descuentos);
+            doc.font('Helvetica-Bold');
+            addRow('Total Deducciones', nomina.total_descuentos);
+            doc.moveDown(1);
+
+            drawLine(doc.y);
+            doc.moveDown();
+            doc.fontSize(16).font('Helvetica-Bold');
+            doc.text('Sueldo Líquido a Recibir:', itemX, doc.y);
+            doc.text(`Q ${parseFloat(nomina.sueldo_liquido).toFixed(2)}`, amountX - 50, doc.y, { width: 150, align: 'right' });
+            doc.moveDown(2);
+
+            doc.fontSize(10).font('Helvetica-Oblique');
+            doc.text('___________________________', 50, doc.y, { align: 'center' });
+            doc.text('Firma del Empleado', 50, doc.y, { align: 'center' });
+            doc.moveDown(1);
+            doc.text('He recibido a mi entera satisfacción el monto líquido especificado en este recibo.', 50, doc.y, { align: 'center' });
+            // --- FIN DEL DISEÑO ---
+        });
+
+        doc.end();
+    } catch (error) {
+        logger.error(`Error al generar PDF de nómina por lote:`, error);
+        res.status(500).json({ mensaje: 'Error interno del servidor al generar el PDF por lote.' });
+    }
 };
 
 

@@ -25,17 +25,17 @@ module.exports = (sequelize, DataTypes) => {
     },
     creado_por: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
     },
     fecha_creacion: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
-      allowNull: true
+      allowNull: false
     },
     activo: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
-      allowNull: true
+      allowNull: false
     }
   }, {
     tableName: 'bienestar',

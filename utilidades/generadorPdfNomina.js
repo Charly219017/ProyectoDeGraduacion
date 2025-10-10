@@ -4,12 +4,10 @@ const PDFDocument = require('pdfkit');
 function generarPdfNomina(nomina, res) {
   const doc = new PDFDocument({ margin: 50 });
 
-  // Configurar la respuesta HTTP para que el navegador descargue el PDF
   const nombreArchivo = `Recibo_Nomina_${nomina.empleado.nombre_completo.replace(/ /g, '_')}_${nomina.mes}_${nomina.anio}.pdf`;
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="${nombreArchivo}"`);
 
-  // Pipe el PDF directamente a la respuesta HTTP
   doc.pipe(res);
 
   // --- INICIO DEL DISEÑO DEL RECIBO ---
@@ -19,7 +17,7 @@ function generarPdfNomina(nomina, res) {
   doc.moveDown();
   doc.fontSize(12).font('Helvetica').text(`Fecha de Emisión: ${new Date(nomina.fecha_generacion).toLocaleDateString('es-GT')}`, { align: 'right' });
   doc.text(`Período: ${String(nomina.mes).padStart(2, '0')}/${nomina.anio}`, { align: 'right' });
-  doc.moveDown(2);
+  doc.moveDown(1);
 
   // 2. Información del Empleado
   doc.fontSize(14).font('Helvetica-Bold').text('Información del Empleado');
@@ -39,7 +37,7 @@ function generarPdfNomina(nomina, res) {
   doc.text(`Puesto:`, xInfo, yInfoStart + 40);
   doc.text(`${nomina.empleado.puesto ? nomina.empleado.puesto.nombre_puesto : 'N/A'}`, 150, yInfoStart + 40);
   
-  doc.moveDown(5);
+  doc.moveDown(3); // Reducido el espacio excesivo para compactar la parte superior
 
   // 3. Detalle de Ingresos y Deducciones (Formato de tabla)
   const tableTop = doc.y + 10;
@@ -49,8 +47,8 @@ function generarPdfNomina(nomina, res) {
   doc.fontSize(14).font('Helvetica-Bold');
   doc.text('Ingresos', itemX, tableTop);
   doc.text('Monto (Q)', amountX, tableTop, { width: 100, align: 'right' });
-  doc.moveDown();
   
+  doc.moveDown();
   const drawLine = (y) => doc.moveTo(50, y).lineTo(560, y).stroke();
   drawLine(doc.y);
   doc.moveDown(0.5);
@@ -80,16 +78,14 @@ function generarPdfNomina(nomina, res) {
   doc.moveDown();
   drawLine(doc.y);
   doc.moveDown(0.5);
-
   doc.fontSize(12).font('Helvetica');
   addRow('Cuota IGSS', nomina.deduccion_igss);
   if (parseFloat(nomina.isr) > 0) addRow('Retención ISR', nomina.isr);
   if (parseFloat(nomina.otros_descuentos) > 0) addRow('Otros Descuentos', nomina.otros_descuentos);
 
-  doc.moveDown();
   doc.font('Helvetica-Bold');
   addRow('Total Deducciones', nomina.total_descuentos);
-  doc.moveDown(2);
+  doc.moveDown(1); // Reducido el salto de línea para un diseño más compacto
 
   // 4. Totales
   drawLine(doc.y);
@@ -97,19 +93,19 @@ function generarPdfNomina(nomina, res) {
   doc.fontSize(16).font('Helvetica-Bold');
   doc.text('Sueldo Líquido a Recibir:', itemX, doc.y);
   doc.text(`Q ${parseFloat(nomina.sueldo_liquido).toFixed(2)}`, amountX - 50, doc.y, { width: 150, align: 'right' });
-  doc.moveDown(4);
+  doc.moveDown(2); // Compactado el espacio después del total
 
   // 5. Pie de Página y Firma
-  const bottomY = doc.page.height - 100;
+  // El contenido fluye naturalmente para evitar saltos de página.
   doc.fontSize(10).font('Helvetica-Oblique');
-  doc.text('___________________________', doc.page.width / 2 - 100, bottomY, { align: 'center' });
-  doc.text('Firma del Empleado', doc.page.width / 2 - 100, bottomY + 15, { align: 'center' });
-  doc.text('He recibido a mi entera satisfacción el monto líquido especificado en este recibo.', 50, doc.page.height - 50, { align: 'center' });
+  doc.text('___________________________', 50, doc.y, { align: 'center' });
+  doc.text('Firma del Empleado', 50, doc.y, { align: 'center' });
+  doc.moveDown(1); // Espacio mínimo antes del texto final
+  doc.text('He recibido a mi entera satisfacción el monto líquido especificado en este recibo.', 50, doc.y, { align: 'center' });
 
 
   // --- FIN DEL DISEÑO ---
 
-  // Finalizar el PDF
   doc.end();
 }
 
