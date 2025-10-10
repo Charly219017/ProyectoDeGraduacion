@@ -1,15 +1,7 @@
 // utilidades/generadorPdfNomina.js
 const PDFDocument = require('pdfkit');
 
-function generarPdfNomina(nomina, res) {
-  const doc = new PDFDocument({ margin: 50 });
-
-  const nombreArchivo = `Recibo_Nomina_${nomina.empleado.nombre_completo.replace(/ /g, '_')}_${nomina.mes}_${nomina.anio}.pdf`;
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename="${nombreArchivo}"`);
-
-  doc.pipe(res);
-
+function dibujarReciboEnPagina(doc, nomina) {
   // --- INICIO DEL DISEÑO DEL RECIBO ---
 
   // 1. Encabezado
@@ -102,13 +94,24 @@ function generarPdfNomina(nomina, res) {
   doc.text('Firma del Empleado', 50, doc.y, { align: 'center' });
   doc.moveDown(1); // Espacio mínimo antes del texto final
   doc.text('He recibido a mi entera satisfacción el monto líquido especificado en este recibo.', 50, doc.y, { align: 'center' });
+}
 
 
-  // --- FIN DEL DISEÑO ---
+function generarPdfNomina(nomina, res) {
+  const doc = new PDFDocument({ margin: 50 });
+
+  const nombreArchivo = `Recibo_Nomina_${nomina.empleado.nombre_completo.replace(/ /g, '_')}_${nomina.mes}_${nomina.anio}.pdf`;
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="${nombreArchivo}"`);
+
+  doc.pipe(res);
+
+  dibujarReciboEnPagina(doc, nomina);
 
   doc.end();
 }
 
 module.exports = {
-  generarPdfNomina
+  generarPdfNomina,
+  dibujarReciboEnPagina
 };

@@ -18,10 +18,11 @@ const obtenerEstadisticas = async (req, res) => {
       Evaluaciones.count({ where: { puntuacion_total: null, activo: true } })
     ]);
 
+    // Se ajustan los nombres de las propiedades para que coincidan con el frontend
     const estadisticas = {
-      empleadosActivos,
-      vacacionesAprobadas,
-      evaluacionesPendientes,
+      activeEmployees: empleadosActivos,
+      approvedVacations: vacacionesAprobadas,
+      pendingEvaluations: evaluacionesPendientes,
       ultimaActualizacion: new Date().toISOString()
     };
 

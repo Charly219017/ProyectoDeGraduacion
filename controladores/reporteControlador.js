@@ -109,24 +109,38 @@ exports.obtenerPromedioDesempeno = async (req, res) => {
   try {
     const promedioDesempeno = await Evaluaciones.findAll({
       attributes: [
+        // Seleccionamos el promedio de la puntuación
         [Evaluaciones.sequelize.fn('AVG', Evaluaciones.sequelize.col('puntuacion_total')), 'promedio_puntuacion']
       ],
       include: [{
         model: Empleados,
         as: 'empleado',
-        attributes: [],
+        attributes: [], // No necesitamos columnas de Empleados
+        required: true,   // Usamos INNER JOIN para asegurar que la evaluación tenga un empleado
         include: [{
           model: Puestos,
           as: 'puesto',
-          attributes: ['nombre_puesto']
+          // Seleccionamos el nombre del puesto para devolverlo en el resultado
+          attributes: ['nombre_puesto'], 
+          required: true // Usamos INNER JOIN para asegurar que el empleado tenga un puesto
         }]
       }],
-      group: ['empleado.puesto.nombre_puesto']
+      // Agrupamos por el ID y el nombre del puesto para que la consulta sea válida en SQL
+      group: ['empleado.puesto.id_puesto', 'empleado.puesto.nombre_puesto'],
+      raw: true, // Obtenemos resultados crudos para un manejo más fácil
+      nest: true
     });
+    
+    // Debido a `raw: true` y `nest: true`, la estructura puede ser un poco diferente.
+    // Nos aseguramos de que el formato sea el que el frontend espera.
+    const datosLimpios = promedioDesempeno.map(item => ({
+        nombre_puesto: item.empleado.puesto.nombre_puesto,
+        promedio_puntuacion: item.promedio_puntuacion
+    }));
 
     res.status(200).json({
       success: true,
-      data: promedioDesempeno
+      data: datosLimpios
     });
   } catch (error) {
     console.error(`Error al obtener promedio de desempeño: ${error.message}`);

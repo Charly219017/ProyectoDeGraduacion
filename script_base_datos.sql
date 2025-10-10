@@ -3,6 +3,13 @@ CREATE TABLE public.roles (
     id_rol serial PRIMARY KEY,
     nombre_rol varchar(50) UNIQUE NOT NULL
 );
+INSERT INTO public.roles (id_rol, nombre_rol) VALUES
+(1, 'Administrador'),
+(2, 'Supervisor'),
+(3, 'Digitador'),
+(4, 'Empleado'),
+(7, 'Externo')
+ON CONFLICT (id_rol) DO NOTHING;
 
 -- Usuarios
 CREATE TABLE public.usuarios (
@@ -17,6 +24,10 @@ CREATE TABLE public.usuarios (
     actualizado_por integer REFERENCES public.usuarios(id_usuario),
     activo boolean DEFAULT true
 );
+
+
+INSERT INTO public.usuarios (nombre_usuario, correo, contrasena_hash, id_rol)
+VALUES ('admin', 'admin@jireh.com', '$2a$12$K7a0nfSL0GRgieYjpVksuODHBctstvxhy3cm4OB9sOAsUkNnyxDGS', 1);
 
 -- Auditoría
 CREATE TABLE public.auditoria (
