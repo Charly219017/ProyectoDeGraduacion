@@ -3,4 +3,3 @@ node_modules
 # Archivos de log
 *.log
 # Archivo de entorno local (se debe pasar al contenedor al ejecutarlo, no incluirlo en la imagen)
-.env

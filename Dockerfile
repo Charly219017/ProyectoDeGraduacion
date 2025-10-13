@@ -13,6 +13,6 @@ COPY --from=builder /usr/src/app/node_modules ./node_modules
 
 COPY --from=builder /usr/src/app .
 
-EXPOSE 3000
+EXPOSE 3001
 
 CMD [ "npm", "start" ]
