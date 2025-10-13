@@ -25,7 +25,7 @@ CREATE TABLE public.usuarios (
     activo boolean DEFAULT true
 );
 
-
+--contraseña: admin123S
 INSERT INTO public.usuarios (nombre_usuario, correo, contrasena_hash, id_rol)
 VALUES ('admin', 'admin@jireh.com', '$2a$12$K7a0nfSL0GRgieYjpVksuODHBctstvxhy3cm4OB9sOAsUkNnyxDGS', 1);
 
