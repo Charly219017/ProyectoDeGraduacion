@@ -248,7 +248,7 @@ CREATE TABLE public.dependencias (
 
 
 
-=============================================================
+-- =============================================================
 
 
 -- =================================================================
@@ -460,3 +460,87 @@ CREATE TRIGGER trg_bienestar_update AFTER UPDATE ON bienestar FOR EACH ROW EXECU
 CREATE TRIGGER trg_bienestar_delete AFTER UPDATE ON bienestar FOR EACH ROW WHEN (OLD.activo IS DISTINCT FROM NEW.activo AND NEW.activo = false) EXECUTE FUNCTION fn_audit_delete_logico('id_bienestar');
 
 -- (Añade aquí triggers para otras tablas como 'usuarios' si lo necesitas)
+
+-- ==========================================
+-- INVENTARIO FARMACIA (SIMPLE)
+-- ==========================================
+
+-- CATEGORÍAS DE PRODUCTOS
+CREATE TABLE public.categorias_inventario (
+    id_categoria serial PRIMARY KEY,
+    nombre_categoria varchar(100) UNIQUE NOT NULL,
+    descripcion text,
+    creado_por integer REFERENCES public.usuarios(id_usuario),
+    fecha_creacion timestamp DEFAULT CURRENT_TIMESTAMP,
+    activo boolean DEFAULT true
+);
+
+-- PRODUCTOS
+CREATE TABLE public.productos (
+    id_producto serial PRIMARY KEY,
+    nombre_producto varchar(150) UNIQUE NOT NULL,
+    descripcion text,
+    id_categoria integer REFERENCES public.categorias_inventario(id_categoria),
+    precio_unitario numeric(10,2) DEFAULT 0.00,
+    stock_actual integer DEFAULT 0,
+    stock_minimo integer DEFAULT 0,
+    creado_por integer REFERENCES public.usuarios(id_usuario),
+    actualizado_por integer REFERENCES public.usuarios(id_usuario),
+    fecha_creacion timestamp DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion timestamp,
+    activo boolean DEFAULT true
+);
+
+-- MOVIMIENTOS DE INVENTARIO (Entradas / Salidas)
+CREATE TABLE public.movimientos_inventario (
+    id_movimiento serial PRIMARY KEY,
+    id_producto integer REFERENCES public.productos(id_producto),
+    tipo_movimiento varchar(20) NOT NULL CHECK (tipo_movimiento IN ('Entrada', 'Salida')),
+    cantidad integer NOT NULL CHECK (cantidad > 0),
+    observaciones text,
+    fecha_movimiento timestamp DEFAULT CURRENT_TIMESTAMP,
+    creado_por integer REFERENCES public.usuarios(id_usuario),
+    activo boolean DEFAULT true
+);
+
+-- FUNCIÓN Y TRIGGER PARA ACTUALIZAR STOCK AUTOMÁTICAMENTE
+CREATE OR REPLACE FUNCTION actualizar_stock()
+RETURNS trigger AS $$
+BEGIN
+    IF NEW.tipo_movimiento = 'Entrada' THEN
+        UPDATE public.productos
+        SET stock_actual = stock_actual + NEW.cantidad,
+            fecha_actualizacion = NOW()
+        WHERE id_producto = NEW.id_producto;
+    ELSIF NEW.tipo_movimiento = 'Salida' THEN
+        UPDATE public.productos
+        SET stock_actual = stock_actual - NEW.cantidad,
+            fecha_actualizacion = NOW()
+        WHERE id_producto = NEW.id_producto;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_actualizar_stock
+AFTER INSERT ON public.movimientos_inventario
+FOR EACH ROW
+EXECUTE FUNCTION actualizar_stock();
+
+-- VISTA DEL INVENTARIO ACTUAL
+CREATE OR REPLACE VIEW public.vw_inventario_actual AS
+SELECT 
+    p.id_producto,
+    p.nombre_producto,
+    c.nombre_categoria,
+    p.stock_actual,
+    p.stock_minimo,
+    p.precio_unitario,
+    CASE 
+        WHEN p.stock_actual <= p.stock_minimo THEN 'Bajo stock'
+        ELSE 'Disponible'
+    END AS estado_stock
+FROM public.productos p
+LEFT JOIN public.categorias_inventario c ON p.id_categoria = c.id_categoria
+WHERE p.activo = true;
+
