@@ -35,6 +35,9 @@ const detalleEvaluacionRutas = require('./rutas/detalleEvaluacionRutas');
 const nominaRutas = require('./rutas/nominaRutas');
 const vacacionRutas = require('./rutas/vacacionRutas');
 const reporteRutas = require('./rutas/reporteRutas');
+const categoriaInventarioRutas = require('./rutas/categoriaInventarioRutas');
+const productoRutas = require('./rutas/productoRutas');
+const movimientoInventarioRutas = require('./rutas/movimientoInventarioRutas');
 
 // Crear aplicación Express
 const app = express();
@@ -74,6 +77,9 @@ app.use('/api/detalles_evaluacion', detalleEvaluacionRutas);
 app.use('/api/nomina', nominaRutas);
 app.use('/api/vacaciones', vacacionRutas);
 app.use('/api/reportes', reporteRutas);
+app.use('/api/inventario/categorias', categoriaInventarioRutas);
+app.use('/api/inventario/productos', productoRutas);
+app.use('/api/inventario/movimientos', movimientoInventarioRutas);
 
 app.use(rutaNoEncontrada);
 app.use(manejarErrores);
